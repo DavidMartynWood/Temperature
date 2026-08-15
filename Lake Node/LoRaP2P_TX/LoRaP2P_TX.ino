@@ -49,6 +49,16 @@ static RadioEvents_t RadioEvents;
 static uint8_t TxdBuffer[64];
 int count = 0;
 
+// Define batter parameters
+#define PIN_VBAT WB_A0
+
+uint32_t vbat_pin = PIN_VBAT;
+
+#define VBAT_MV_PER_LSB (0.73242188F) // 3.0V ADC range and 12 - bit ADC resolution = 3000mV / 4096
+#define VBAT_DIVIDER_COMP (1.73)      // Compensation factor for the VBAT divider, depend on the board
+
+#define REAL_VBAT_MV_PER_LSB (VBAT_DIVIDER_COMP * VBAT_MV_PER_LSB)
+
 void setup()
 {
 
@@ -90,6 +100,13 @@ void setup()
 					  LORA_SPREADING_FACTOR, LORA_CODINGRATE,
 					  LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
 					  true, 0, 0, LORA_IQ_INVERSION_ON, TX_TIMEOUT_VALUE);
+
+  // Configure for reading battery level
+	// Set the analog reference to 3.0V (default = 3.6V)
+	analogReference(AR_INTERNAL_3_0);
+	// Set the resolution to 12-bit (0..4095)
+	analogReadResolution(12); // Can be 8, 10, 12 or 14
+
 	send();
 }
 
@@ -115,17 +132,54 @@ void OnTxTimeout(void)
 	Serial.println("OnTxTimeout");
 }
 
+/**
+ * @brief Get RAW Battery Voltage
+ */
+float readVBAT(void)
+{
+    float raw;
+
+    // Get the raw 12-bit, 0..3000mV ADC value
+    raw = analogRead(vbat_pin);
+
+    return raw * REAL_VBAT_MV_PER_LSB;
+}
+
+/**
+ * @brief Convert from raw mv to percentage
+ * @param mvolts
+ *    RAW Battery Voltage
+ */
+uint8_t mvToPercent(float mvolts)
+{
+    if (mvolts < 3300)
+        return 0;
+
+    if (mvolts < 3600)
+    {
+        mvolts -= 3300;
+        return mvolts / 30;
+    }
+
+    mvolts -= 3600;
+    return 10 + (mvolts * 0.15F); // thats mvolts /6.66666666
+}
+
 void send()
 {
 	count++;
 
-	int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
-                   "{\"count\":%d}", count);
+	// Get a raw ADC reading
+	float vbat_mv = readVBAT();
 
-	//TxdBuffer[0] = 'H';
-	//TxdBuffer[1] = 'e';
-	//TxdBuffer[2] = 'l';
-	//TxdBuffer[3] = 'l';
-	//TxdBuffer[4] = 'o';
+	// Convert from raw mv to percentage (based on LIPO chemistry)
+	uint8_t vbat_per = mvToPercent(vbat_mv);
+
+	int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
+                   "{\"count\":%d, \"b\":%d}", count, vbat_per);
+
+	Serial.write(TxdBuffer, len);
+	Serial.println();
+	
 	Radio.Send(TxdBuffer, len);
 }
