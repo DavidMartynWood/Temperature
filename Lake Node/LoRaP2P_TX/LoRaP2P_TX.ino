@@ -45,9 +45,19 @@ void OnTxTimeout(void);
 #define RX_TIMEOUT_VALUE 3000
 #define TX_TIMEOUT_VALUE 3000
 
+#define MYLOG_LOG_LEVEL 0
+
+// Sleep time in milliseconds (30 minutes = 1800000)
+#define SLEEP_TIME 1800000
+
 static RadioEvents_t RadioEvents;
 static uint8_t TxdBuffer[64];
 int count = 0;
+
+// Semaphore to wake up loop task
+SemaphoreHandle_t taskEvent = NULL;
+// Timer to wake up loop
+SoftwareTimer taskWakeupTimer;
 
 // Define batter parameters
 #define PIN_VBAT WB_A0
@@ -59,9 +69,15 @@ uint32_t vbat_pin = PIN_VBAT;
 
 #define REAL_VBAT_MV_PER_LSB (VBAT_DIVIDER_COMP * VBAT_MV_PER_LSB)
 
+void periodicWakeup(TimerHandle_t unused)
+{
+  // Give the semaphore, so the loop task will wake up
+  xSemaphoreGiveFromISR(taskEvent, pdFALSE);
+}
+
 void setup()
 {
-
+#if MYLOG_LOG_LEVEL > 0
 	// Initialize Serial for debug output
 	time_t timeout = millis();
 	Serial.begin(115200);
@@ -79,6 +95,8 @@ void setup()
 	Serial.println("=====================================");
 	Serial.println("LoRap2p Tx Test");
 	Serial.println("=====================================");
+#endif
+
 	// Initialize LoRa chip.
 	lora_rak4630_init();
 	// Initialize the Radio callbacks
@@ -107,29 +125,50 @@ void setup()
 	// Set the resolution to 12-bit (0..4095)
 	analogReadResolution(12); // Can be 8, 10, 12 or 14
 
+	taskEvent = xSemaphoreCreateBinary();
+
+  // Give the semaphore, seems to be required to initialize it
+  xSemaphoreGive(taskEvent);
+
+  // Take the semaphore, so loop will be stopped waiting to get it
+  xSemaphoreTake(taskEvent, 10);
+
+  // Start the timer that will wakeup the loop frequently
+  taskWakeupTimer.begin(SLEEP_TIME, periodicWakeup);
+  taskWakeupTimer.start();
+
 	send();
 }
 
 void loop()
 {
-  // Put your application tasks here, like reading of sensors,
-  // Controlling actuators and/or other functions. 
+    // Sleep until we are woken up by an event
+  if (xSemaphoreTake(taskEvent, portMAX_DELAY) == pdTRUE)
+  {
+		send();
+	}
 }
 
 /**@brief Function to be executed on Radio Tx Done event
  */
 void OnTxDone(void)
 {
+#if MYLOG_LOG_LEVEL > 0
 	Serial.println("OnTxDone");
-	delay(5000);
-	send();
+#endif
+
+	Radio.Sleep();
 }
 
 /**@brief Function to be executed on Radio Tx Timeout event
  */
 void OnTxTimeout(void)
 {
+#if MYLOG_LOG_LEVEL > 0
 	Serial.println("OnTxTimeout");
+#endif
+
+	Radio.Sleep();
 }
 
 /**
@@ -167,6 +206,12 @@ uint8_t mvToPercent(float mvolts)
 
 void send()
 {
+	// Switch on green LED to show we are awake
+#if MYLOG_LOG_LEVEL > 0
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500); // Only so we can see the green LED
+#endif
+
 	count++;
 
 	// Get a raw ADC reading
@@ -176,10 +221,17 @@ void send()
 	uint8_t vbat_per = mvToPercent(vbat_mv);
 
 	int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
-                   "{\"count\":%d, \"b\":%d}", count, vbat_per);
+                   "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, vbat_mv);
 
+#if MYLOG_LOG_LEVEL > 0
 	Serial.write(TxdBuffer, len);
 	Serial.println();
-	
+#endif
+
+	//Radio.Standby();
 	Radio.Send(TxdBuffer, len);
+
+#if MYLOG_LOG_LEVEL > 0
+    digitalWrite(LED_BUILTIN, LOW);
+#endif
 }
