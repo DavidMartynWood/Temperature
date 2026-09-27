@@ -125,6 +125,9 @@ void setup()
 	// Set the resolution to 12-bit (0..4095)
 	analogReadResolution(12); // Can be 8, 10, 12 or 14
 
+	// Let the ADC settle
+  delay(1);
+
 	taskEvent = xSemaphoreCreateBinary();
 
   // Give the semaphore, seems to be required to initialize it
@@ -221,7 +224,7 @@ void send()
 	uint8_t vbat_per = mvToPercent(vbat_mv);
 
 	int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
-                   "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, vbat_mv);
+                   "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, (int)vbat_mv);
 
 #if MYLOG_LOG_LEVEL > 0
 	Serial.write(TxdBuffer, len);
