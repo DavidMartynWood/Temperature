@@ -126,19 +126,22 @@ void setup()
 	analogReadResolution(12); // Can be 8, 10, 12 or 14
 
 	// Let the ADC settle
-  delay(1);
+  delay(5);
+
+	// Take a single battery reading and throw it away. Fist read always seems to be wrong.
+	readVBAT();
 
 	taskEvent = xSemaphoreCreateBinary();
 
-  // Give the semaphore, seems to be required to initialize it
-  xSemaphoreGive(taskEvent);
+	// Give the semaphore, seems to be required to initialize it
+	xSemaphoreGive(taskEvent);
 
-  // Take the semaphore, so loop will be stopped waiting to get it
-  xSemaphoreTake(taskEvent, 10);
+	// Take the semaphore, so loop will be stopped waiting to get it
+	xSemaphoreTake(taskEvent, 10);
 
-  // Start the timer that will wakeup the loop frequently
-  taskWakeupTimer.begin(SLEEP_TIME, periodicWakeup);
-  taskWakeupTimer.start();
+	// Start the timer that will wakeup the loop frequently
+	taskWakeupTimer.begin(SLEEP_TIME, periodicWakeup);
+	taskWakeupTimer.start();
 
 	send();
 }
