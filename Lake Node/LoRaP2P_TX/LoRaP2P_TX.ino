@@ -47,14 +47,19 @@ void OnTxTimeout(void);
 #define RX_TIMEOUT_VALUE 3000
 #define TX_TIMEOUT_VALUE 5000
 
+#define PROTOCOL_VERSION 1
+#define DEVICE_ID 1
+#define PAYLOAD_SIZE 7
+
 #define MYLOG_LOG_LEVEL 0
 
 // Sleep time in milliseconds (30 minutes = 1800000)
 #define SLEEP_TIME 1800000
 
 static RadioEvents_t RadioEvents;
-static uint8_t TxdBuffer[64];
-int count = 0;
+
+static uint8_t TxdBuffer[PAYLOAD_SIZE];
+uint16_t count = 0;
 uint32_t txStartTime = 0;
 
 // Semaphore to wake up loop task
@@ -279,36 +284,40 @@ void send()
     // Build packet
     // -------------------------------------------------------------------------
 
-    int len;
+	// Convert temperature to signed integer in tenths of a degree.
+  // INT16_MIN (0x8000) indicates a disconnected sensor.
+  int16_t temperatureDeci;
 
-    if (temperatureC == DEVICE_DISCONNECTED_C)
-    {
-        // Sensor wasn't detected
-        len = snprintf(
-            (char *)TxdBuffer,
-            sizeof(TxdBuffer),
-            "{\"count\":%d, \"b\":%d, \"bv\":%d, \"t\":null}",
-            count,
-            vbat_per,
-            (int)vbat_mv);
-    }
-    else
-    {
-        len = snprintf(
-            (char *)TxdBuffer,
-            sizeof(TxdBuffer),
-            "{\"count\":%d, \"b\":%d, \"bv\":%d, \"t\":%.2f}",
-            count,
-            vbat_per,
-            (int)vbat_mv,
-            temperatureC);
-    }
-	//int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
-  //                 "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, (int)vbat_mv);
+  if (temperatureC == DEVICE_DISCONNECTED_C)
+  {
+    temperatureDeci = INT16_MIN;
+  }
+  else
+  {
+    temperatureDeci = (int16_t)lroundf(temperatureC * 10.0f);
+  }
+
+  // Encode 16-bit fields in big-endian byte order
+  uint16_t temperatureRaw = (uint16_t)temperatureDeci;
+
+  TxdBuffer[0] = PROTOCOL_VERSION;
+  TxdBuffer[1] = DEVICE_ID;
+  TxdBuffer[2] = (uint8_t)(count >> 8);
+  TxdBuffer[3] = (uint8_t)(count & 0xFF);
+  TxdBuffer[4] = (uint8_t)(temperatureRaw >> 8);
+  TxdBuffer[5] = (uint8_t)(temperatureRaw & 0xFF);
+  TxdBuffer[6] = vbat_per;
 
 #if MYLOG_LOG_LEVEL > 0
+  Serial.printf("Sending %d bytes: ", PAYLOAD_SIZE);
 
-  Serial.print("Temperature: ");
+  for (int i = 0; i < PAYLOAD_SIZE; i++)
+  {
+    Serial.printf("%02X ", TxdBuffer[i]);
+  }
+
+  Serial.printf("\nCount: %u, Temperature: %.1f C, Battery: %u%%\n",
+                count, temperatureC, vbat_per);
 
   if (temperatureC == DEVICE_DISCONNECTED_C)
   {
@@ -320,13 +329,13 @@ void send()
       Serial.println(" C");
   }
 
-	Serial.write(TxdBuffer, len);
+	Serial.write(TxdBuffer, PAYLOAD_SIZE);
 	Serial.println();
 
 	txStartTime = millis();
 #endif
 
-	Radio.Send(TxdBuffer, len);
+	Radio.Send(TxdBuffer, PAYLOAD_SIZE);
 
 #if MYLOG_LOG_LEVEL > 0
     digitalWrite(LED_BUILTIN, LOW);
