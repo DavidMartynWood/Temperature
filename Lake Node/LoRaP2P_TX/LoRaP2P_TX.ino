@@ -45,7 +45,7 @@ void OnTxTimeout(void);
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
 #define RX_TIMEOUT_VALUE 3000
-#define TX_TIMEOUT_VALUE 3000
+#define TX_TIMEOUT_VALUE 5000
 
 #define MYLOG_LOG_LEVEL 0
 
@@ -55,6 +55,7 @@ void OnTxTimeout(void);
 static RadioEvents_t RadioEvents;
 static uint8_t TxdBuffer[64];
 int count = 0;
+uint32_t txStartTime = 0;
 
 // Semaphore to wake up loop task
 SemaphoreHandle_t taskEvent = NULL;
@@ -196,7 +197,9 @@ void loop()
 void OnTxDone(void)
 {
 #if MYLOG_LOG_LEVEL > 0
-	Serial.println("OnTxDone");
+  uint32_t txDuration = millis() - txStartTime;
+  Serial.printf("OnTxDone - transmission took %lu ms\n",
+                (unsigned long)txDuration);
 #endif
 
 	Radio.Sleep();
@@ -319,6 +322,8 @@ void send()
 
 	Serial.write(TxdBuffer, len);
 	Serial.println();
+
+	txStartTime = millis();
 #endif
 
 	Radio.Send(TxdBuffer, len);
