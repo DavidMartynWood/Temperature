@@ -23,6 +23,8 @@
 #include <Arduino.h>
 #include <SX126x-RAK4630.h> //http://librarymanager/All#SX126x
 #include <SPI.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 // Function declarations
 void OnTxDone(void);
@@ -59,7 +61,19 @@ SemaphoreHandle_t taskEvent = NULL;
 // Timer to wake up loop
 SoftwareTimer taskWakeupTimer;
 
-// Define batter parameters
+// -----------------------------------------------------------------------------
+// Temperature sensor
+// -----------------------------------------------------------------------------
+
+#define ONE_WIRE_BUS WB_IO1
+
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature temperatureSensor(&oneWire);
+
+// -----------------------------------------------------------------------------
+// Battery
+// -----------------------------------------------------------------------------
+
 #define PIN_VBAT WB_A0
 
 uint32_t vbat_pin = PIN_VBAT;
@@ -97,7 +111,21 @@ void setup()
 	Serial.println("=====================================");
 #endif
 
-	// Initialize LoRa chip.
+    // -------------------------------------------------------------------------
+    // Initialize temperature sensor
+    // -------------------------------------------------------------------------
+
+    temperatureSensor.begin();
+
+#if MYLOG_LOG_LEVEL > 0
+    Serial.print("DS18B20 sensors found: ");
+    Serial.println(temperatureSensor.getDeviceCount());
+#endif
+
+    // -------------------------------------------------------------------------
+    // Initialize LoRa chip
+    // -------------------------------------------------------------------------
+
 	lora_rak4630_init();
 	// Initialize the Radio callbacks
 	RadioEvents.TxDone = OnTxDone;
@@ -119,7 +147,10 @@ void setup()
 					  LORA_PREAMBLE_LENGTH, LORA_FIX_LENGTH_PAYLOAD_ON,
 					  true, 0, 0, LORA_IQ_INVERSION_ON, TX_TIMEOUT_VALUE);
 
-  // Configure for reading battery level
+  // -------------------------------------------------------------------------
+  // Configure battery measurement
+  // -------------------------------------------------------------------------
+
 	// Set the analog reference to 3.0V (default = 3.6V)
 	analogReference(AR_INTERNAL_3_0);
 	// Set the resolution to 12-bit (0..4095)
@@ -130,6 +161,10 @@ void setup()
 
 	// Take a single battery reading and throw it away. Fist read always seems to be wrong.
 	readVBAT();
+
+	// -------------------------------------------------------------------------
+	// Sleep/wakeup mechanism
+	// -------------------------------------------------------------------------
 
 	taskEvent = xSemaphoreCreateBinary();
 
@@ -143,6 +178,7 @@ void setup()
 	taskWakeupTimer.begin(SLEEP_TIME, periodicWakeup);
 	taskWakeupTimer.start();
 
+	// Send the first reading immediately
 	send();
 }
 
@@ -220,21 +256,71 @@ void send()
 
 	count++;
 
-	// Get a raw ADC reading
+	// -------------------------------------------------------------------------
+	// Read temperature
+	// -------------------------------------------------------------------------
+
+	temperatureSensor.requestTemperatures();
+
+	float temperatureC = temperatureSensor.getTempCByIndex(0);
+
+	// -------------------------------------------------------------------------
+	// Read battery
+	// -------------------------------------------------------------------------
+
 	float vbat_mv = readVBAT();
 
-	// Convert from raw mv to percentage (based on LIPO chemistry)
 	uint8_t vbat_per = mvToPercent(vbat_mv);
 
-	int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
-                   "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, (int)vbat_mv);
+    // -------------------------------------------------------------------------
+    // Build packet
+    // -------------------------------------------------------------------------
+
+    int len;
+
+    if (temperatureC == DEVICE_DISCONNECTED_C)
+    {
+        // Sensor wasn't detected
+        len = snprintf(
+            (char *)TxdBuffer,
+            sizeof(TxdBuffer),
+            "{\"count\":%d, \"b\":%d, \"bv\":%d, \"t\":null}",
+            count,
+            vbat_per,
+            (int)vbat_mv);
+    }
+    else
+    {
+        len = snprintf(
+            (char *)TxdBuffer,
+            sizeof(TxdBuffer),
+            "{\"count\":%d, \"b\":%d, \"bv\":%d, \"t\":%.2f}",
+            count,
+            vbat_per,
+            (int)vbat_mv,
+            temperatureC);
+    }
+	//int len = snprintf((char *)TxdBuffer, sizeof(TxdBuffer),
+  //                 "{\"count\":%d, \"b\":%d, \"bv\":%d}", count, vbat_per, (int)vbat_mv);
 
 #if MYLOG_LOG_LEVEL > 0
+
+  Serial.print("Temperature: ");
+
+  if (temperatureC == DEVICE_DISCONNECTED_C)
+  {
+      Serial.println("DISCONNECTED");
+  }
+  else
+  {
+      Serial.print(temperatureC);
+      Serial.println(" C");
+  }
+
 	Serial.write(TxdBuffer, len);
 	Serial.println();
 #endif
 
-	//Radio.Standby();
 	Radio.Send(TxdBuffer, len);
 
 #if MYLOG_LOG_LEVEL > 0
