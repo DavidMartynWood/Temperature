@@ -1,26 +1,11 @@
+
 /**
  * @file LoRaP2P_RX.ino
- * @author rakwireless.com
- * @brief Receiver node for LoRa point to point communication
- * @version 0.1
- * @date 2020-08-21
- * 
- * @copyright Copyright (c) 2020
- * 
- * @note RAK4631 GPIO mapping to nRF52840 GPIO ports
-   RAK4631    <->  nRF52840
-   WB_IO1     <->  P0.17 (GPIO 17)
-   WB_IO2     <->  P1.02 (GPIO 34)
-   WB_IO3     <->  P0.21 (GPIO 21)
-   WB_IO4     <->  P0.04 (GPIO 4)
-   WB_IO5     <->  P0.09 (GPIO 9)
-   WB_IO6     <->  P0.10 (GPIO 10)
-   WB_SW1     <->  P0.01 (GPIO 1)
-   WB_A0      <->  P0.04/AIN2 (AnalogIn A2)
-   WB_A1      <->  P0.31/AIN7 (AnalogIn A7)
+ * @brief Receiver node for LoRa point-to-point communication
  */
+
 #include <Arduino.h>
-#include <SX126x-RAK4630.h> //http://librarymanager/All#SX126x
+#include <SX126x-RAK4630.h>
 #include <SPI.h>
 
 // Function declarations
@@ -32,7 +17,7 @@ void OnRxError(void);
 #define LED_BUILTIN 35
 #endif
 
-// Define LoRa parameters
+// LoRa parameters
 #define RF_FREQUENCY 868300000	// Hz
 #define TX_OUTPUT_POWER 14		// dBm - was 22 which may be illegal
 #define LORA_BANDWIDTH 0		// [0: 125 kHz, 1: 250 kHz, 2: 500 kHz, 3: Reserved]
@@ -42,95 +27,168 @@ void OnRxError(void);
 #define LORA_SYMBOL_TIMEOUT 0	// Symbols
 #define LORA_FIX_LENGTH_PAYLOAD_ON false
 #define LORA_IQ_INVERSION_ON false
-#define RX_TIMEOUT_VALUE 10000
-#define TX_TIMEOUT_VALUE 3000
+
+// Payload format
+#define PROTOCOL_VERSION 1
+#define PAYLOAD_SIZE 7
 
 static RadioEvents_t RadioEvents;
 
-static uint8_t RcvBuffer[64];
-
 void setup()
 {
-
-	// Initialize Serial for debug output
-	time_t timeout = millis();
-	Serial.begin(115200);
-	while (!Serial)
-	{
-		if ((millis() - timeout) < 5000)
-		{
+    time_t timeout = millis();
+    Serial.begin(115200);
+    while (!Serial)
+    {
+        if ((millis() - timeout) < 5000)
+        {
             delay(100);
         }
         else
         {
             break;
         }
-	}
-	Serial.println("=====================================");
-	Serial.println("LoRaP2P Rx Test");
-	Serial.println("=====================================");
-	// Initialize LoRa chip.
-	lora_rak4630_init();
-	// Initialize the Radio callbacks
-	RadioEvents.TxDone = NULL;
-	RadioEvents.RxDone = OnRxDone;
-	RadioEvents.TxTimeout = NULL;
-	RadioEvents.RxTimeout = OnRxTimeout;
-	RadioEvents.RxError = OnRxError;
-	RadioEvents.CadDone = NULL;
+    }
 
-	// Initialize the Radio
-	Radio.Init(&RadioEvents);
+    Serial.println("=====================================");
+    Serial.println("LoRaP2P Rx Test");
+    Serial.println("=====================================");
+    // Initialize LoRa chip.
+    lora_rak4630_init();
+    // Initialize the Radio callbacks
+    RadioEvents.TxDone = NULL;
+    RadioEvents.RxDone = OnRxDone;
+    RadioEvents.TxTimeout = NULL;
+    RadioEvents.RxTimeout = OnRxTimeout;
+    RadioEvents.RxError = OnRxError;
+    RadioEvents.CadDone = NULL;
 
-	// Set Radio channel
-	Radio.SetChannel(RF_FREQUENCY);
+    // Initialize the Radio
+    Radio.Init(&RadioEvents);
 
-	// Set Radio RX configuration
-	Radio.SetRxConfig(MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
-					  LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
-					  LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
-					  0, true, 0, 0, LORA_IQ_INVERSION_ON, true);
+    // Set Radio channel
+    Radio.SetChannel(RF_FREQUENCY);
 
-	// Start LoRa
-	Serial.println("Starting Radio.Rx");
-	Radio.Rx(0);
-	//Radio.Rx(RX_TIMEOUT_VALUE);
+    // Set Radio RX configuration
+    Radio.SetRxConfig(
+        MODEM_LORA,
+        LORA_BANDWIDTH,
+        LORA_SPREADING_FACTOR,
+        LORA_CODINGRATE,
+        0,
+        LORA_PREAMBLE_LENGTH,
+        LORA_SYMBOL_TIMEOUT,
+        LORA_FIX_LENGTH_PAYLOAD_ON,
+        0,
+        true,
+        0,
+        0,
+        LORA_IQ_INVERSION_ON,
+        true
+    );
+
+    // Start LoRa
+    Serial.println("Starting Radio.Rx");
+    Radio.Rx(0);
 }
 
 void loop()
 {
- // Put your application tasks here, like reading of sensors,
-  // Controlling actuators and/or other functions. 
-
+    // Radio reception is handled by callbacks.
 }
 
-/**@brief Function to be executed on Radio Rx Done event
- */
+/** @brief Process a received packet */
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
 {
-	delay(10);
-	memcpy(RcvBuffer, payload, size);
+    if (size != PAYLOAD_SIZE)
+    {
+        Serial.printf(
+            "{\"error\":\"Invalid payload size\",\"size\":%u}\n",
+            size
+        );
+        Radio.Rx(0);
+        return;
+    }
 
-	Serial.printf("{\"rssi\":%d,\"snr\":%d,\"payload\":", rssi, snr);
-	for (int idx = 0; idx < size; idx++)
-	{
-		Serial.write(RcvBuffer[idx]);
-	}
-	Serial.println("}");
+    // Decode protocol header
+    uint8_t version = payload[0];
+    uint8_t deviceId = payload[1];
+
+    if (version != PROTOCOL_VERSION)
+    {
+        Serial.printf(
+            "{\"error\":\"Unsupported protocol version\",\"version\":%u}\n",
+            version
+        );
+        Radio.Rx(0);
+        return;
+    }
+
+    // Decode 16-bit big-endian fields
+    uint16_t count =
+        ((uint16_t)payload[2] << 8) |
+        (uint16_t)payload[3];
+
+    uint16_t temperatureRaw =
+        ((uint16_t)payload[4] << 8) |
+        (uint16_t)payload[5];
+
+    int16_t temperatureDeci = (int16_t)temperatureRaw;
+    uint8_t batteryPercent = payload[6];
+
+    // Output outer JSON and original-style payload JSON.
+    Serial.printf(
+        "{\"rssi\":%d,\"snr\":%d,\"payload\":{"
+        "\"count\":%u,\"b\":%u,",
+        rssi,
+        snr,
+        count,
+        batteryPercent
+    );
+
+    // Temperature sentinel means sensor disconnected.
+    if (temperatureDeci == INT16_MIN)
+    {
+        Serial.print("\"t\":null");
+    }
+    else
+    {
+        // Format to one decimal place without relying on
+        // floating-point printf support.
+        int32_t magnitude = temperatureDeci;
+        if (magnitude < 0)
+        {
+            Serial.print("\"t\":-");
+            magnitude = -magnitude;
+        }
+        else
+        {
+            Serial.print("\"t\":");
+        }
+
+        Serial.printf(
+            "%ld.%ld",
+            (long)(magnitude / 10),
+            (long)(magnitude % 10)
+        );
+    }
+
+    Serial.println("}}");
+
+    // Continue listening for the next packet.
+    Radio.Rx(0);
 }
 
-/**@brief Function to be executed on Radio Rx Timeout event
- */
+/** @brief Radio receive timeout */
 void OnRxTimeout(void)
 {
-	Serial.println("OnRxTimeout");
-	//Radio.Rx(RX_TIMEOUT_VALUE);
+    Serial.println("OnRxTimeout");
+    Radio.Rx(0);
 }
 
-/**@brief Function to be executed on Radio Rx Error event
- */
+/** @brief Radio receive error */
 void OnRxError(void)
 {
-	Serial.println("OnRxError");
-	//Radio.Rx(RX_TIMEOUT_VALUE);
+    Serial.println("OnRxError");
+    Radio.Rx(0);
 }
