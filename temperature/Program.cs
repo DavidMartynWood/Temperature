@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTelemetry.Metrics;
 using Serilog;
 
 // Simple Serilog -> OTLP configuration. Reads `OTEL_EXPORTER_OTLP_ENDPOINT`,
@@ -20,6 +21,11 @@ try
     var builder = Host.CreateApplicationBuilder(args);
     builder.Logging.ClearProviders();
     builder.Logging.AddSerilog(dispose: true);
+
+    builder.Services.AddOpenTelemetry()
+        .WithMetrics(metrics => metrics
+            .AddMeter(SerialLineWorker.MeterName)
+            .AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint)));
 
     builder.Services.AddHostedService<SerialLineWorker>();
 
