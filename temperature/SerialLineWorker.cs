@@ -13,22 +13,30 @@ public sealed class SerialLineWorker : BackgroundService
     private readonly Meter _meter = new(MeterName);
     private readonly Gauge<double> _temperatureGauge;
     private readonly Gauge<int> _batteryGauge;
+    private readonly Gauge<int> _rssiGauge;
+    private readonly Gauge<int> _snrGauge;
 
     public SerialLineWorker(ILogger<SerialLineWorker> logger)
     {
         _logger = logger;
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
         _batteryGauge = _meter.CreateGauge<int>("battery", unit: "%");
+        _rssiGauge = _meter.CreateGauge<int>("rssi", unit: "dBm");
+        _snrGauge = _meter.CreateGauge<int>("snr", unit: "dB");
     }
 
-    private void UpdateMeasurements(RadioPayload payload)
+    private void UpdateMeasurements(RadioMessage message)
     {
+        var payload = message.Payload;
+
         if (payload.Temperature is double temperature)
         {
             _temperatureGauge.Record(temperature);
         }
 
         _batteryGauge.Record(payload.BatteryPercent);
+        _rssiGauge.Record(message.Rssi);
+        _snrGauge.Record(message.Snr);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -77,7 +85,7 @@ public sealed class SerialLineWorker : BackgroundService
                             continue;
                         }
 
-                        UpdateMeasurements(message.Payload);
+                        UpdateMeasurements(message);
                     }
                     catch (JsonException ex)
                     {
