@@ -10,15 +10,20 @@ public sealed class SerialLineWorker : BackgroundService
     public const string MeterName = "Temperature.Radio";
 
     private readonly ILogger<SerialLineWorker> _logger;
+    private readonly TemperatureSensorForwarder _forwarder;
     private readonly Meter _meter;
     private readonly Gauge<double> _temperatureGauge;
     private readonly Gauge<int> _batteryGauge;
     private readonly Gauge<int> _rssiGauge;
     private readonly Gauge<int> _snrGauge;
 
-    public SerialLineWorker(ILogger<SerialLineWorker> logger, IMeterFactory meterFactory)
+    public SerialLineWorker(
+        ILogger<SerialLineWorker> logger,
+        IMeterFactory meterFactory,
+        TemperatureSensorForwarder forwarder)
     {
         _logger = logger;
+        _forwarder = forwarder;
         _meter = meterFactory.Create(MeterName);
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
         _batteryGauge = _meter.CreateGauge<int>("battery", unit: "%");
@@ -87,6 +92,7 @@ public sealed class SerialLineWorker : BackgroundService
                         }
 
                         UpdateMeasurements(message);
+                        await _forwarder.ForwardAsync(line, stoppingToken);
                     }
                     catch (JsonException ex)
                     {

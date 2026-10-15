@@ -25,8 +25,10 @@ try
     builder.Services.AddOpenTelemetry()
         .WithMetrics(metrics => metrics
             .AddMeter(SerialLineWorker.MeterName)
+            .AddMeter(TemperatureSensorForwarder.MeterName)
             .AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint)));
 
+    builder.Services.AddHttpClient<TemperatureSensorForwarder>();
     builder.Services.AddHostedService<SerialLineWorker>();
 
     var host = builder.Build();
