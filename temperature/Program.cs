@@ -26,16 +26,23 @@ try
     builder.Services.AddOpenTelemetry()
         .WithMetrics(metrics => metrics
             .AddMeter(SerialLineWorker.MeterName)
-            .AddMeter(TemperatureSensorForwarder.MeterName)
+            .AddMeter(TemperatureForwardingMetrics.MeterName)
             .AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint)));
+
+    builder.Services.AddSingleton<TemperatureForwardingMetrics>();
 
     // Retry for transient network errors, with exponential backoff 8 times totalling about 4 minutes
     builder.Services.AddHttpClient<TemperatureSensorForwarder>()
-        .AddPolicyHandler(Policy<HttpResponseMessage>
-            .Handle<HttpRequestException>()
-            .WaitAndRetryAsync(
-                8,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1))));
+        .AddPolicyHandler((services, _) =>
+        {
+            var metrics = services.GetRequiredService<TemperatureForwardingMetrics>();
+            return Policy<HttpResponseMessage>
+                .Handle<HttpRequestException>()
+                .WaitAndRetryAsync(
+                    8,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1)),
+                    onRetry: (_, _, _, _) => metrics.RecordRetry());
+        });
 
     builder.Services.AddHostedService<SerialLineWorker>();
 
