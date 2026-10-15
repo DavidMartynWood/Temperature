@@ -10,15 +10,16 @@ public sealed class SerialLineWorker : BackgroundService
     public const string MeterName = "Temperature.Radio";
 
     private readonly ILogger<SerialLineWorker> _logger;
-    private readonly Meter _meter = new(MeterName);
+    private readonly Meter _meter;
     private readonly Gauge<double> _temperatureGauge;
     private readonly Gauge<int> _batteryGauge;
     private readonly Gauge<int> _rssiGauge;
     private readonly Gauge<int> _snrGauge;
 
-    public SerialLineWorker(ILogger<SerialLineWorker> logger)
+    public SerialLineWorker(ILogger<SerialLineWorker> logger, IMeterFactory meterFactory)
     {
         _logger = logger;
+        _meter = meterFactory.Create(MeterName);
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
         _batteryGauge = _meter.CreateGauge<int>("battery", unit: "%");
         _rssiGauge = _meter.CreateGauge<int>("rssi", unit: "dBm");
@@ -109,11 +110,5 @@ public sealed class SerialLineWorker : BackgroundService
                 serial.Close();
             }
         }
-    }
-
-    public override void Dispose()
-    {
-        _meter.Dispose();
-        base.Dispose();
     }
 }
