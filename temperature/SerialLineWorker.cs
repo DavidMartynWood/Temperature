@@ -78,6 +78,8 @@ public sealed class SerialLineWorker : BackgroundService
                     break;
                 }
 
+                var receivedAtUtc = DateTimeOffset.UtcNow;
+
                 if (!string.IsNullOrWhiteSpace(line))
                 {
                     _logger.LogInformation("Received line: {Line}", line);
@@ -92,7 +94,7 @@ public sealed class SerialLineWorker : BackgroundService
                         }
 
                         UpdateMeasurements(message);
-                        await _forwarder.ForwardAsync(line, stoppingToken);
+                        await _forwarder.ForwardAsync(line, receivedAtUtc, stoppingToken);
                     }
                     catch (JsonException ex)
                     {
