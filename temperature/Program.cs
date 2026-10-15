@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenTelemetry.Metrics;
+using Polly;
 using Serilog;
 
 // Simple Serilog -> OTLP configuration. Reads `OTEL_EXPORTER_OTLP_ENDPOINT`,
@@ -28,7 +29,14 @@ try
             .AddMeter(TemperatureSensorForwarder.MeterName)
             .AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint)));
 
-    builder.Services.AddHttpClient<TemperatureSensorForwarder>();
+    // Retry for transient network errors, with exponential backoff 8 times totalling about 4 minutes
+    builder.Services.AddHttpClient<TemperatureSensorForwarder>()
+        .AddPolicyHandler(Policy<HttpResponseMessage>
+            .Handle<HttpRequestException>()
+            .WaitAndRetryAsync(
+                8,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 1))));
+
     builder.Services.AddHostedService<SerialLineWorker>();
 
     var host = builder.Build();
