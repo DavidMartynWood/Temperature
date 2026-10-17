@@ -2,9 +2,7 @@
 CREATE TABLE readings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     received_at TEXT NOT NULL,
-    temperature_c REAL NOT NULL,
-    device_id TEXT NOT NULL DEFAULT 'lake-sensor',
-    battery_percent INTEGER
+    temperature_c REAL NOT NULL
 );
 
 CREATE INDEX idx_readings_received_at
