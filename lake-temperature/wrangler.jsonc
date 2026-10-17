@@ -5,6 +5,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "lake-temperature",
+	"main": "src/index.ts",
 	"compatibility_date": "2026-10-06",
 	"assets": {
 		// The path to the directory containing the `index.html` file to be served at `/`
@@ -13,7 +14,14 @@
 	"observability": {
 		"enabled": true
 	},
-	"upload_source_maps": true
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "lake_temperature_db",
+			"database_name": "lake-temperature-db",
+			"database_id": "89f17196-6ad4-4005-8ac5-714f946b7071"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
