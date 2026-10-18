@@ -3,10 +3,96 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
+		<meta name="theme-color" content="#f2f6f5" />
+		<title>Lake temperature</title>
+		<style>
+			:root {
+				color-scheme: light;
+				font-family: system-ui, sans-serif;
+				color: #173b3b;
+				background: #f2f6f5;
+			}
+
+			body {
+				display: grid;
+				min-height: 100vh;
+				margin: 0;
+				place-items: center;
+			}
+
+			main {
+				width: min(24rem, calc(100% - 3rem));
+				padding: 2.5rem;
+				border-radius: 1rem;
+				background: white;
+				box-shadow: 0 1rem 3rem #173b3b14;
+				text-align: center;
+			}
+
+			h1 {
+				margin: 0 0 2rem;
+				font-size: 1.25rem;
+				font-weight: 600;
+			}
+
+			#temperature {
+				margin: 0;
+				font-size: clamp(3rem, 15vw, 5rem);
+				font-weight: 700;
+				letter-spacing: -0.06em;
+				line-height: 1.1;
+			}
+
+			#reading-time {
+				margin: 1rem 0 0;
+				color: #52706e;
+			}
+		</style>
 	</head>
 	<body>
-		<h1 id="heading">Hello, World!</h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
+		<main>
+			<h1>Lake temperature</h1>
+			<p id="temperature" aria-live="polite">Loading…</p>
+			<p id="reading-time" hidden>
+				Reading time: <time id="timestamp"></time> (your local time)
+			</p>
+		</main>
+		<script>
+			const temperature = document.querySelector("#temperature");
+			const readingTime = document.querySelector("#reading-time");
+			const timestamp = document.querySelector("#timestamp");
+
+			async function showLatestReading() {
+				try {
+					const response = await fetch("/api/latest", { cache: "no-store" });
+					if (!response.ok) {
+						throw new Error("Could not load the latest reading");
+					}
+
+					const { reading } = await response.json();
+					if (
+						!reading ||
+						!Number.isFinite(reading.temperature_c) ||
+						!Number.isFinite(Date.parse(reading.timestamp))
+					) {
+						temperature.textContent = "No reading yet";
+						return;
+					}
+
+					const date = new Date(reading.timestamp);
+					temperature.textContent = `${reading.temperature_c.toLocaleString(
+						undefined,
+						{ maximumFractionDigits: 1 },
+					)} °C`;
+					timestamp.dateTime = date.toISOString();
+					timestamp.textContent = date.toLocaleString();
+					readingTime.hidden = false;
+				} catch {
+					temperature.textContent = "Temperature unavailable";
+				}
+			}
+
+			showLatestReading();
+		</script>
 	</body>
 </html>
