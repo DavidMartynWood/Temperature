@@ -5,167 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="theme-color" content="#f2f6f5" />
 		<title>Lake temperature</title>
-		<style>
-			:root {
-				color-scheme: light;
-				font-family: system-ui, sans-serif;
-				color: #173b3b;
-				background: #f2f6f5;
-			}
-
-			body {
-				display: grid;
-				min-height: 100vh;
-				margin: 0;
-				padding: 2rem 0;
-				place-items: start center;
-			}
-
-			main {
-				box-sizing: border-box;
-				width: min(64rem, calc(100% - 2rem));
-				padding: 2.5rem;
-				border-radius: 1rem;
-				background: white;
-				box-shadow: 0 1rem 3rem #173b3b14;
-				text-align: center;
-			}
-
-			h1 {
-				margin: 0 0 1.5rem;
-				font-size: 1.25rem;
-				font-weight: 600;
-			}
-
-			#temperature {
-				margin: 0.5rem 0 0;
-				font-size: clamp(2.5rem, 10vw, 4rem);
-				font-weight: 700;
-				letter-spacing: -0.06em;
-				line-height: 1.1;
-			}
-
-			#reading-time {
-				margin: 1rem 0 0;
-				color: #52706e;
-			}
-
-			#history {
-				margin-top: 2.5rem;
-			}
-
-			#history h2 {
-				margin: 0 0 1rem;
-				font-size: 1.125rem;
-			}
-
-			#range-controls {
-				display: flex;
-				justify-content: center;
-				flex-wrap: wrap;
-				gap: 0.5rem;
-			}
-
-			#range-controls button {
-				padding: 0.5rem 0.75rem;
-				border: 1px solid #b9ccca;
-				border-radius: 999px;
-				color: #173b3b;
-				background: white;
-				font: inherit;
-				cursor: pointer;
-			}
-
-			#range-controls button[aria-pressed="true"] {
-				border-color: #176b65;
-				color: white;
-				background: #176b65;
-			}
-
-			#chart {
-				display: block;
-				width: 100%;
-				height: auto;
-				margin-top: 1rem;
-				overflow: visible;
-			}
-
-			.chart-grid {
-				stroke: #e5eeec;
-				stroke-width: 1;
-			}
-
-			.chart-label {
-				fill: #52706e;
-				font: 12px system-ui, sans-serif;
-			}
-
-			.chart-line {
-				fill: none;
-				stroke-width: 2;
-			}
-
-			path.chart-line {
-				fill: none;
-			}
-
-			.chart-point {
-				stroke: white;
-				stroke-width: 1;
-			}
-
-			.chart-min {
-				stroke: #2875a5;
-				fill: #2875a5;
-			}
-
-			.chart-max {
-				stroke: #d06a37;
-				fill: #d06a37;
-			}
-
-			.chart-reading {
-				stroke: #176b65;
-				fill: #176b65;
-			}
-
-			#chart-legend {
-				display: flex;
-				justify-content: center;
-				gap: 1.5rem;
-				margin: 0.5rem 0;
-				color: #52706e;
-				font-size: 0.875rem;
-			}
-
-			#chart-legend[hidden] {
-				display: none;
-			}
-
-			.legend-min {
-				color: #2875a5;
-			}
-
-			.legend-max {
-				color: #d06a37;
-			}
-
-			#history-status {
-				min-height: 1.5rem;
-				margin: 0.5rem 0 0;
-				color: #52706e;
-			}
-
-			@media (max-width: 36rem) {
-				main {
-					padding: 1.5rem 1rem;
-				}
-
-				.chart-label {
-					font-size: 32px;
-				}
-			}
-		</style>
+		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
 		<main>
@@ -183,15 +23,15 @@
 					<button type="button" data-range="year" aria-pressed="true">Year</button>
 					<button type="button" data-range="all" aria-pressed="false">All</button>
 				</div>
-				<svg id="chart" viewBox="0 0 900 320" role="img" aria-label="Loading temperature history"></svg>
-				<div id="chart-legend" hidden>
-					<span class="legend-min">● Daily low</span>
-					<span class="legend-max">● Daily high</span>
+				<div id="chart-container">
+					<canvas id="chart" role="img" aria-label="Loading temperature history"></canvas>
 				</div>
 				<p id="history-status" aria-live="polite"></p>
 				<p>History available from 18 October 2026 (UTC).</p>
 			</section>
 		</main>
-		<script src="/history.js" defer></script>
+		<script src="/vendor/chart.umd.js"></script>
+		<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+		<script type="module" src="/js/main.js"></script>
 	</body>
 </html>
