@@ -1,0 +1,97 @@
+:root {
+	color-scheme: light;
+	font-family: system-ui, sans-serif;
+	color: #173b3b;
+	background: #f2f6f5;
+}
+
+body {
+	display: grid;
+	min-height: 100vh;
+	margin: 0;
+	padding: 2rem 0;
+	place-items: start center;
+}
+
+main {
+	box-sizing: border-box;
+	width: min(64rem, calc(100% - 2rem));
+	padding: 2.5rem;
+	border-radius: 1rem;
+	background: white;
+	box-shadow: 0 1rem 3rem #173b3b14;
+	text-align: center;
+}
+
+h1 {
+	margin: 0 0 1.5rem;
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+#temperature {
+	margin: 0.5rem 0 0;
+	font-size: clamp(2.5rem, 10vw, 4rem);
+	font-weight: 700;
+	letter-spacing: -0.06em;
+	line-height: 1.1;
+}
+
+#reading-time {
+	margin: 1rem 0 0;
+	color: #52706e;
+}
+
+#history {
+	margin-top: 2.5rem;
+}
+
+#history h2 {
+	margin: 0 0 1rem;
+	font-size: 1.125rem;
+}
+
+#range-controls {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+#range-controls button {
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #b9ccca;
+	border-radius: 999px;
+	color: #173b3b;
+	background: white;
+	font: inherit;
+	cursor: pointer;
+}
+
+#range-controls button[aria-pressed="true"] {
+	border-color: #176b65;
+	color: white;
+	background: #176b65;
+}
+
+#chart-container {
+	position: relative;
+	height: 20rem;
+	margin-top: 1rem;
+}
+
+#history-status {
+	min-height: 1.5rem;
+	margin: 0.5rem 0 0;
+	color: #52706e;
+}
+
+@media (max-width: 36rem) {
+	main {
+		padding: 1.5rem 1rem;
+	}
+
+	#chart-container {
+		height: 16rem;
+	}
+}
