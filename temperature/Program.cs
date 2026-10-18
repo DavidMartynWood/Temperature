@@ -13,6 +13,7 @@ Serilog.Debugging.SelfLog.Enable(msg => Console.Error.WriteLine("SERILOG_SELF: "
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
     .WriteTo.Console()
     .WriteTo.OpenTelemetry(opts => { opts.Endpoint = otlpEndpoint; })
     .CreateLogger();
