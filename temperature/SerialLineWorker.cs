@@ -94,7 +94,14 @@ public sealed class SerialLineWorker : BackgroundService
                         }
 
                         UpdateMeasurements(message);
-                        await _forwarder.ForwardAsync(line, receivedAtUtc, stoppingToken);
+
+                        if (message.Payload.Temperature is not double temperature)
+                        {
+                            _logger.LogError("Ignoring JSON line without a temperature value");
+                            continue;
+                        }
+
+                        await _forwarder.ForwardAsync(temperature, receivedAtUtc, stoppingToken);
                     }
                     catch (JsonException ex)
                     {

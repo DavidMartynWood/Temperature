@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -23,18 +25,22 @@ public sealed class TemperatureSensorForwarder
     }
 
     public async Task ForwardAsync(
-        string json,
-        DateTimeOffset receivedAtUtc,
+        double temperature_c,
+        DateTimeOffset timestamp,
         CancellationToken cancellationToken)
     {
         try
         {
-            var payload = JsonNode.Parse(json)?.AsObject()
-                ?? throw new JsonException("Temperature sensor JSON must be an object");
-            payload["receivedAtUtc"] = receivedAtUtc;
-
-            using var content = new StringContent(payload.ToJsonString(), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PostAsync(Endpoint, content, cancellationToken);
+            using var response = await _httpClient.PostAsJsonAsync(
+                Endpoint,
+                new
+                {
+                    temperature_c,
+                    timestamp = timestamp.UtcDateTime.ToString(
+                        "yyyy-MM-dd'T'HH:mm:ss.fff'Z'",
+                        CultureInfo.InvariantCulture)
+                },
+                cancellationToken);
             response.EnsureSuccessStatusCode();
         }
         catch (Exception ex)
