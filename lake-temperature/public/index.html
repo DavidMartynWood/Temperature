@@ -17,11 +17,13 @@
 				display: grid;
 				min-height: 100vh;
 				margin: 0;
-				place-items: center;
+				padding: 2rem 0;
+				place-items: start center;
 			}
 
 			main {
-				width: min(24rem, calc(100% - 3rem));
+				box-sizing: border-box;
+				width: min(64rem, calc(100% - 2rem));
 				padding: 2.5rem;
 				border-radius: 1rem;
 				background: white;
@@ -30,14 +32,14 @@
 			}
 
 			h1 {
-				margin: 0 0 2rem;
+				margin: 0 0 1.5rem;
 				font-size: 1.25rem;
 				font-weight: 600;
 			}
 
 			#temperature {
-				margin: 0;
-				font-size: clamp(3rem, 15vw, 5rem);
+				margin: 0.5rem 0 0;
+				font-size: clamp(2.5rem, 10vw, 4rem);
 				font-weight: 700;
 				letter-spacing: -0.06em;
 				line-height: 1.1;
@@ -46,6 +48,118 @@
 			#reading-time {
 				margin: 1rem 0 0;
 				color: #52706e;
+			}
+
+			#history {
+				margin-top: 2.5rem;
+			}
+
+			#history h2 {
+				margin: 0 0 1rem;
+				font-size: 1.125rem;
+			}
+
+			#range-controls {
+				display: flex;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
+
+			#range-controls button {
+				padding: 0.5rem 0.75rem;
+				border: 1px solid #b9ccca;
+				border-radius: 999px;
+				color: #173b3b;
+				background: white;
+				font: inherit;
+				cursor: pointer;
+			}
+
+			#range-controls button[aria-pressed="true"] {
+				border-color: #176b65;
+				color: white;
+				background: #176b65;
+			}
+
+			#chart {
+				display: block;
+				width: 100%;
+				height: auto;
+				margin-top: 1rem;
+				overflow: visible;
+			}
+
+			.chart-grid {
+				stroke: #e5eeec;
+				stroke-width: 1;
+			}
+
+			.chart-label {
+				fill: #52706e;
+				font: 12px system-ui, sans-serif;
+			}
+
+			.chart-line {
+				fill: none;
+				stroke-width: 2;
+			}
+
+			path.chart-line {
+				fill: none;
+			}
+
+			.chart-point {
+				stroke: white;
+				stroke-width: 1;
+			}
+
+			.chart-min {
+				stroke: #2875a5;
+				fill: #2875a5;
+			}
+
+			.chart-max {
+				stroke: #d06a37;
+				fill: #d06a37;
+			}
+
+			.chart-reading {
+				stroke: #176b65;
+				fill: #176b65;
+			}
+
+			#chart-legend {
+				display: flex;
+				justify-content: center;
+				gap: 1.5rem;
+				margin: 0.5rem 0;
+				color: #52706e;
+				font-size: 0.875rem;
+			}
+
+			#chart-legend[hidden] {
+				display: none;
+			}
+
+			.legend-min {
+				color: #2875a5;
+			}
+
+			.legend-max {
+				color: #d06a37;
+			}
+
+			#history-status {
+				min-height: 1.5rem;
+				margin: 0.5rem 0 0;
+				color: #52706e;
+			}
+
+			@media (max-width: 36rem) {
+				main {
+					padding: 1.5rem 1rem;
+				}
 			}
 		</style>
 	</head>
@@ -56,11 +170,35 @@
 			<p id="reading-time" hidden>
 				Reading time: <time id="timestamp"></time> (your local time)
 			</p>
+			<section id="history" aria-labelledby="history-title">
+				<h2 id="history-title">Temperature history</h2>
+				<div id="range-controls" role="group" aria-label="History range">
+					<button type="button" data-range="day" aria-pressed="false">Day</button>
+					<button type="button" data-range="week" aria-pressed="false">Week</button>
+					<button type="button" data-range="month" aria-pressed="false">Month</button>
+					<button type="button" data-range="year" aria-pressed="true">Year</button>
+					<button type="button" data-range="all" aria-pressed="false">All</button>
+				</div>
+				<svg id="chart" viewBox="0 0 900 320" role="img" aria-label="Loading temperature history"></svg>
+				<div id="chart-legend" hidden>
+					<span class="legend-min">● Daily low</span>
+					<span class="legend-max">● Daily high</span>
+				</div>
+				<p id="history-status" aria-live="polite"></p>
+				<p>History available from 18 October 2026 (UTC).</p>
+			</section>
 		</main>
 		<script>
 			const temperature = document.querySelector("#temperature");
 			const readingTime = document.querySelector("#reading-time");
 			const timestamp = document.querySelector("#timestamp");
+			const chart = document.querySelector("#chart");
+			const chartLegend = document.querySelector("#chart-legend");
+			const historyStatus = document.querySelector("#history-status");
+			const rangeButtons = document.querySelectorAll("[data-range]");
+			const earliestHistoryDate = "2026-10-18";
+			const dayMilliseconds = 24 * 60 * 60 * 1000;
+			let historyRequest = 0;
 
 			async function showLatestReading() {
 				try {
@@ -92,7 +230,170 @@
 				}
 			}
 
+			function getRange(range) {
+				const end = new Date();
+				end.setUTCHours(0, 0, 0, 0);
+				const start = new Date(end);
+
+				switch (range) {
+					case "day":
+						break;
+					case "week":
+						start.setUTCDate(start.getUTCDate() - 6);
+						break;
+					case "month":
+						start.setUTCDate(start.getUTCDate() - 29);
+						break;
+					case "year":
+						start.setUTCDate(start.getUTCDate() - 364);
+						break;
+					case "all":
+						start.setTime(Date.parse(`${earliestHistoryDate}T00:00:00.000Z`));
+						break;
+				}
+
+				const from = new Date(Math.max(start.getTime(), Date.parse(`${earliestHistoryDate}T00:00:00.000Z`)));
+				const to = new Date(end.getTime() + dayMilliseconds);
+				return {
+					from: from.toISOString().slice(0, 10),
+					to: new Date(to.getTime() - dayMilliseconds).toISOString().slice(0, 10),
+					start: from,
+					end: to,
+				};
+			}
+
+			function appendSvgElement(name, attributes = {}, text = "") {
+				const element = document.createElementNS("http://www.w3.org/2000/svg", name);
+				for (const [key, value] of Object.entries(attributes)) {
+					element.setAttribute(key, value);
+				}
+				if (text) {
+					element.textContent = text;
+				}
+				chart.append(element);
+				return element;
+			}
+
+			function drawChart(readings, range, aggregation) {
+				chart.replaceChildren();
+				chartLegend.hidden = aggregation !== "daily-extremes";
+				chart.setAttribute(
+					"aria-label",
+					aggregation === "daily-extremes"
+						? "Daily low and high temperatures in degrees Celsius"
+						: "Temperature readings in degrees Celsius",
+				);
+
+				const daily = aggregation === "daily-extremes";
+				const points = daily
+					? readings.flatMap((reading) => [
+						{ timestamp: `${reading.date}T00:00:00.000Z`, temperature_c: reading.min_temperature_c, series: "min" },
+						{ timestamp: `${reading.date}T00:00:00.000Z`, temperature_c: reading.max_temperature_c, series: "max" },
+					])
+					: readings.map((reading) => ({ ...reading, series: "reading" }));
+				if (points.length === 0) {
+					historyStatus.textContent = "No readings in this period.";
+					return;
+				}
+
+				const validPoints = points.filter((point) =>
+					Number.isFinite(point.temperature_c) && Number.isFinite(Date.parse(point.timestamp))
+				);
+				if (validPoints.length === 0) {
+					historyStatus.textContent = "No valid readings in this period.";
+					return;
+				}
+
+				const width = 900;
+				const height = 320;
+				const left = 64;
+				const right = 20;
+				const top = 20;
+				const bottom = 42;
+				let minimum = Infinity;
+				let maximum = -Infinity;
+				for (const point of validPoints) {
+					minimum = Math.min(minimum, point.temperature_c);
+					maximum = Math.max(maximum, point.temperature_c);
+				}
+				const padding = maximum === minimum ? 1 : (maximum - minimum) * 0.08;
+				const low = minimum - padding;
+				const high = maximum + padding;
+				const x = (point) => left + ((Date.parse(point.timestamp) - range.start.getTime()) /
+					(range.end.getTime() - range.start.getTime())) * (width - left - right);
+				const y = (value) => top + ((high - value) / (high - low)) * (height - top - bottom);
+
+				for (let index = 0; index <= 4; index++) {
+					const value = high - ((high - low) * index) / 4;
+					const coordinate = y(value);
+					appendSvgElement("line", { x1: left, x2: width - right, y1: coordinate, y2: coordinate, class: "chart-grid" });
+					appendSvgElement("text", { x: left - 8, y: coordinate + 4, "text-anchor": "end", class: "chart-label" }, `${value.toFixed(1)}°`);
+				}
+
+				for (const [date, coordinate] of [
+					[range.start, left],
+					[new Date(range.end.getTime() - dayMilliseconds), width - right],
+				]) {
+					appendSvgElement("text", { x: coordinate, y: height - 10, "text-anchor": coordinate === left ? "start" : "end", class: "chart-label" }, date.toLocaleDateString(undefined, { timeZone: "UTC" }));
+				}
+
+				for (const series of daily ? ["min", "max"] : ["reading"]) {
+					const seriesPoints = validPoints.filter((point) => point.series === series);
+					if (seriesPoints.length > 1) {
+						const path = seriesPoints.map((point, index) =>
+							`${index === 0 ? "M" : "L"} ${x(point).toFixed(2)} ${y(point.temperature_c).toFixed(2)}`
+						).join(" ");
+						appendSvgElement("path", { d: path, class: `chart-line chart-${series}` });
+					}
+					for (const point of seriesPoints) {
+						appendSvgElement("circle", {
+							cx: x(point),
+							cy: y(point.temperature_c),
+							r: daily ? 2 : 4,
+							class: `chart-point chart-${series}`,
+						});
+					}
+				}
+
+				historyStatus.textContent = `${validPoints.length} plotted point${validPoints.length === 1 ? "" : "s"} · ${range.from} to ${range.to}`;
+			}
+
+			async function showHistory(rangeName) {
+				const requestId = ++historyRequest;
+				for (const button of rangeButtons) {
+					button.setAttribute("aria-pressed", String(button.dataset.range === rangeName));
+				}
+				const range = getRange(rangeName);
+				const parameters = new URLSearchParams({ from: range.from, to: range.to });
+				chart.replaceChildren();
+				chart.setAttribute("aria-label", "Loading temperature history");
+				historyStatus.textContent = "Loading history…";
+
+				try {
+					const response = await fetch(`/api/history?${parameters}`, { cache: "no-store" });
+					if (!response.ok) {
+						throw new Error("Could not load temperature history");
+					}
+					const { readings, aggregation } = await response.json();
+					if (requestId !== historyRequest) {
+						return;
+					}
+					drawChart(readings, range, aggregation);
+				} catch {
+					if (requestId !== historyRequest) {
+						return;
+					}
+					chartLegend.hidden = true;
+					historyStatus.textContent = "Temperature history unavailable.";
+					chart.setAttribute("aria-label", "Temperature history unavailable");
+				}
+			}
+
 			showLatestReading();
+			for (const button of rangeButtons) {
+				button.addEventListener("click", () => showHistory(button.dataset.range));
+			}
+			showHistory("year");
 		</script>
 	</body>
 </html>

@@ -9,6 +9,23 @@ interface ReadingRequest {
   temperature_c: number;
 }
 
+const EARLIEST_HISTORY_DATE = "2026-10-18";
+const EARLIEST_HISTORY_TIMESTAMP = `${EARLIEST_HISTORY_DATE}T00:00:00.000Z`;
+const HOUR_IN_MILLISECONDS = 60 * 60 * 1000;
+const DAY_IN_MILLISECONDS = 24 * HOUR_IN_MILLISECONDS;
+
+function parseDate(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(date.getTime()) &&
+      date.toISOString().slice(0, 10) === value
+    ? date
+    : null;
+}
+
 export default {
   async fetch(
     request: Request,
@@ -106,37 +123,83 @@ export default {
     }
 
     if (path === "/api/history" && request.method === "GET") {
-      const hoursParam = url.searchParams.get("hours") ?? "168";
-      const hours = Number(hoursParam);
+      const fromParam = url.searchParams.get("from");
+      const toParam = url.searchParams.get("to");
+      const hasDateRange = fromParam !== null || toParam !== null;
+      const today = new Date().toISOString().slice(0, 10);
+      let start: Date;
+      let end: Date;
+      let hours: number | undefined;
 
-      if (
-        !/^\d+$/.test(hoursParam) ||
-        !Number.isSafeInteger(hours) ||
-        hours < 1 ||
-        hours > 720
-      ) {
-        return Response.json(
-          { error: "hours must be an integer between 1 and 720" },
-          { status: 400 },
-        );
+      if (hasDateRange) {
+        const from = fromParam === null ? null : parseDate(fromParam);
+        const to = toParam === null ? null : parseDate(toParam);
+
+        if (
+          from === null ||
+          to === null ||
+          fromParam! < EARLIEST_HISTORY_DATE ||
+          toParam! < fromParam! ||
+          toParam! > today
+        ) {
+          return Response.json(
+            { error: "from and to must be dates from 2026-10-18 through today, with from on or before to" },
+            { status: 400 },
+          );
+        }
+
+        start = from;
+        end = new Date(to.getTime() + DAY_IN_MILLISECONDS);
+      } else {
+        const hoursParam = url.searchParams.get("hours") ?? "168";
+        hours = Number(hoursParam);
+
+        if (
+          !/^\d+$/.test(hoursParam) ||
+          !Number.isSafeInteger(hours) ||
+          hours < 1 ||
+          !Number.isFinite(Date.now() - hours * HOUR_IN_MILLISECONDS) ||
+          Date.now() - hours * HOUR_IN_MILLISECONDS < -8.64e15
+        ) {
+          return Response.json(
+            { error: "hours must be a positive integer within the supported date range" },
+            { status: 400 },
+          );
+        }
+
+        start = new Date(Math.max(
+          Date.now() - hours * HOUR_IN_MILLISECONDS,
+          Date.parse(EARLIEST_HISTORY_TIMESTAMP),
+        ));
+        end = new Date();
       }
 
-      const cutoff = new Date(
-        Date.now() - hours * 60 * 60 * 1000,
-      ).toISOString();
-
-      const result = await env.lake_temperature_db
-        .prepare(`
+      const dailyExtremes = end.getTime() - start.getTime() >= 365 * DAY_IN_MILLISECONDS;
+      const query = dailyExtremes
+        ? `
+          SELECT date(received_at) AS date,
+                 MIN(temperature_c) AS min_temperature_c,
+                 MAX(temperature_c) AS max_temperature_c
+          FROM readings
+          WHERE received_at >= ? AND received_at < ?
+          GROUP BY date(received_at)
+          ORDER BY date ASC
+        `
+        : `
           SELECT received_at AS timestamp, temperature_c
           FROM readings
-          WHERE received_at >= ?
+          WHERE received_at >= ? AND received_at < ?
           ORDER BY received_at ASC, id ASC
-        `)
-        .bind(cutoff)
+        `;
+
+      const result = await env.lake_temperature_db
+        .prepare(query)
+        .bind(start.toISOString(), end.toISOString())
         .all();
 
       return Response.json({
-        hours,
+        ...(hours === undefined ? { from: fromParam, to: toParam } : { hours }),
+        aggregation: dailyExtremes ? "daily-extremes" : "readings",
         readings: result.results,
       });
     }
