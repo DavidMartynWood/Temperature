@@ -12,6 +12,7 @@ public sealed class SerialLineWorker : BackgroundService
     private readonly ILogger<SerialLineWorker> _logger;
     private readonly TemperatureSensorForwarder _forwarder;
     private readonly Meter _meter;
+    private readonly Counter<long> _rxErrorCounter;
     private readonly Gauge<double> _temperatureGauge;
     private readonly Gauge<int> _batteryGauge;
     private readonly Gauge<int> _rssiGauge;
@@ -25,6 +26,7 @@ public sealed class SerialLineWorker : BackgroundService
         _logger = logger;
         _forwarder = forwarder;
         _meter = meterFactory.Create(MeterName);
+        _rxErrorCounter = _meter.CreateCounter<long>("radio_rx_errors");
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
         _batteryGauge = _meter.CreateGauge<int>("battery", unit: "%");
         _rssiGauge = _meter.CreateGauge<int>("rssi", unit: "dBm");
@@ -83,6 +85,12 @@ public sealed class SerialLineWorker : BackgroundService
                 if (!string.IsNullOrWhiteSpace(line))
                 {
                     _logger.LogInformation("Received line: {Line}", line);
+
+                    if (line == "OnRxError")
+                    {
+                        _rxErrorCounter.Add(1);
+                        continue;
+                    }
 
                     try
                     {
