@@ -24,6 +24,10 @@ export function health(): Response {
 
 /** POST /api/readings - authenticated ingestion of a single reading. */
 export async function postReading(request: Request, env: Env): Promise<Response> {
+  if (env.READ_ONLY === "true") {
+    return jsonError("This deployment is read-only", 403);
+  }
+
   if (!env.INGEST_TOKEN) {
     return jsonError("Ingestion is not configured", 503);
   }

@@ -21,7 +21,21 @@
 			"database_name": "lake-temperature-db",
 			"database_id": "89f17196-6ad4-4005-8ac5-714f946b7071"
 		}
-	]
+	],
+	// PR preview deployments: separate Worker, same prod D1 database, writes disabled in code.
+	"env": {
+		"dev": {
+			"name": "lake-temperature-dev",
+			"vars": { "READ_ONLY": "true" },
+			"d1_databases": [
+				{
+					"binding": "lake_temperature_db",
+					"database_name": "lake-temperature-db",
+					"database_id": "89f17196-6ad4-4005-8ac5-714f946b7071"
+				}
+			]
+		}
+	}
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
