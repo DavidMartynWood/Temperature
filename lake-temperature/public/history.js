@@ -115,7 +115,7 @@ function drawChart(readings, range, aggregation) {
 
 	const width = 900;
 	const height = 320;
-	const left = 64;
+	const left = window.matchMedia("(max-width: 36rem)").matches ? 96 : 64;
 	const right = 20;
 	const top = 20;
 	const bottom = 42;
