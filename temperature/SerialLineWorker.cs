@@ -50,7 +50,7 @@ public sealed class SerialLineWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         const string portName = "/dev/ttyACM0";
-        const int baudRate = 115200;
+        const int baudRate = 9600;
 
         using var serial = new SerialPort(portName, baudRate)
         {
