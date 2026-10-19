@@ -67,4 +67,4 @@ showLatestReading();
 for (const button of rangeButtons) {
 	button.addEventListener("click", () => showHistory(button.dataset.range));
 }
-showHistory("year");
+showHistory("day");
