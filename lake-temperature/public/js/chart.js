@@ -5,7 +5,7 @@ let chart = null;
 
 function toPoints(readings, aggregation) {
 	if (aggregation === "daily-extremes") {
-		const day = (reading) => new Date(`${reading.date}T00:00:00`).getTime();
+		const day = (reading) => Date.parse(`${reading.date}T00:00:00.000Z`);
 		return [
 			{ label: "Daily low", color: COLORS.min, radius: 2, data: readings.map((r) => ({ x: day(r), y: r.min_temperature_c })) },
 			{ label: "Daily high", color: COLORS.max, radius: 2, data: readings.map((r) => ({ x: day(r), y: r.max_temperature_c })) },
