@@ -11,6 +11,7 @@ public sealed class SerialLineWorker : BackgroundService
 
     private readonly ILogger<SerialLineWorker> _logger;
     private readonly TemperatureSensorForwarder _forwarder;
+    private readonly IConfiguration _configuration;
     private readonly Meter _meter;
     private readonly Counter<long> _rxErrorCounter;
     private readonly Gauge<double> _temperatureGauge;
@@ -21,10 +22,12 @@ public sealed class SerialLineWorker : BackgroundService
     public SerialLineWorker(
         ILogger<SerialLineWorker> logger,
         IMeterFactory meterFactory,
-        TemperatureSensorForwarder forwarder)
+        TemperatureSensorForwarder forwarder,
+        IConfiguration configuration)
     {
         _logger = logger;
         _forwarder = forwarder;
+        _configuration = configuration;
         _meter = meterFactory.Create(MeterName);
         _rxErrorCounter = _meter.CreateCounter<long>("radio_rx_errors");
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
@@ -49,7 +52,7 @@ public sealed class SerialLineWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        const string portName = "/dev/ttyACM0";
+        var portName = _configuration["TEMPERATURE_SERIAL_PORT"] ?? "/dev/ttyACM0";
         const int baudRate = 115200;
 
         using var serial = new SerialPort(portName, baudRate)

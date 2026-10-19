@@ -26,8 +26,8 @@ try
     builder.Logging.AddSerilog(dispose: true);
     var endpoints = new List<TemperatureForwardingEndpoint>
         {
-            new() { Url = "http://192.168.4.162:1880/temperature" },
-            new() { Url = "https://lake-temperature.davidmartynwood.workers.dev/api/readings", BearerToken = builder.Configuration["LAKE_TEMPERATURE_API_TOKEN"] }
+            new() { Url = builder.Configuration["TEMPERATURE_LOCAL_ENDPOINT_URL"] ?? "http://192.168.4.162:1880/temperature" },
+            new() { Url = builder.Configuration["LAKE_TEMPERATURE_ENDPOINT_URL"] ?? "https://lake-temperature.davidmartynwood.workers.dev/api/readings", BearerToken = builder.Configuration["LAKE_TEMPERATURE_API_TOKEN"] }
         };
 
     foreach (var endpoint in endpoints)
