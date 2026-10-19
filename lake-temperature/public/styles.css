@@ -86,6 +86,19 @@ h1 {
 	color: #52706e;
 }
 
+#social-links {
+	margin-top: 2rem;
+	color: #52706e;
+}
+
+#social-links p {
+	margin: 0;
+}
+
+#social-links a {
+	color: #176b65;
+}
+
 @media (max-width: 36rem) {
 	main {
 		padding: 1.5rem 1rem;
