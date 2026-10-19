@@ -150,7 +150,7 @@ describe("history date configuration", () => {
         timeZone: "UTC",
         year: "numeric",
       });
-    expect(html).toContain(`History available from ${date} (UTC).`);
+    expect(html).toContain(`History available from ${date}.`);
   });
 });
 
