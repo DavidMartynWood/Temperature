@@ -10,18 +10,22 @@ import {
 } from "../src/validation.ts";
 import { EARLIEST_HISTORY_DATE as clientEarliestHistoryDate } from "../public/js/config.js";
 
-function createDatabase() {
-  const query = { sql: "", bindings: [], results: [] };
+function createDatabase(startingReading = null) {
+  const query = { sql: "", bindings: [], results: [], startingReading, calls: [] };
   return {
     query,
     database: {
       prepare(sql) {
         query.sql = sql;
+        const call = { sql, bindings: [] };
+        query.calls.push(call);
         return {
           bind(...bindings) {
             query.bindings = bindings;
+            call.bindings = bindings;
             return {
               all: async () => ({ results: query.results }),
+              first: async () => query.startingReading,
             };
           },
         };
@@ -95,6 +99,27 @@ describe("history API", () => {
       "2026-10-18T00:00:00.000Z",
       "2026-10-20T00:00:00.000Z",
     ]);
+  });
+
+  it("returns the latest reading before the requested start as a chart anchor", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-19T12:00:00.000Z"));
+    const startingReading = {
+      timestamp: "2026-10-17T23:55:00.000Z",
+      temperature_c: 14.2,
+    };
+    const { database, query } = createDatabase(startingReading);
+
+    const response = await getHistory(
+      new URL("https://example.test/api/history?from=2026-10-18&to=2026-10-19"),
+      { lake_temperature_db: database },
+    );
+
+    expect((await responseJson(response)).startingReading).toEqual(startingReading);
+    expect(query.calls[0]).toMatchObject({
+      sql: expect.stringContaining("WHERE received_at < ?"),
+      bindings: ["2026-10-18T00:00:00.000Z"],
+    });
   });
 
   it("switches year-long ranges to daily extremes", async () => {

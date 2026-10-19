@@ -24,7 +24,7 @@ function toPoints(readings, aggregation) {
  * @param range    result of getRange()
  * @param aggregation "readings" or "daily-extremes"
  */
-export function drawChart(canvas, readings, range, aggregation) {
+export function drawChart(canvas, readings, range, aggregation, startingReading = null) {
 	const daily = aggregation === "daily-extremes";
 	const series = toPoints(readings, aggregation).map((s) => ({
 		...s,
@@ -44,6 +44,20 @@ export function drawChart(canvas, readings, range, aggregation) {
 	const values = series.flatMap((s) => s.data.map((p) => p.y));
 	const yMin = Math.floor(Math.min(...values) - 1);
 	const yMax = Math.ceil(Math.max(...values) + 1);
+
+	if (
+		startingReading &&
+		Number.isFinite(Date.parse(startingReading.timestamp)) &&
+		Number.isFinite(startingReading.temperature_c)
+	) {
+		const startingPoint = {
+			x: Date.parse(startingReading.timestamp),
+			y: startingReading.temperature_c,
+		};
+		for (const s of series) {
+			s.data.unshift(startingPoint);
+		}
+	}
 
 	chart = new Chart(canvas, {
 		type: "line",
