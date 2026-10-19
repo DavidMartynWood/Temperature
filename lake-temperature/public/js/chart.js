@@ -42,6 +42,10 @@ export function drawChart(canvas, readings, range, aggregation) {
 		return 0;
 	}
 
+	const values = series.flatMap((s) => s.data.map((p) => p.y));
+	const yMin = Math.floor(Math.min(...values) - 1);
+	const yMax = Math.ceil(Math.max(...values) + 1);
+
 	chart = new Chart(canvas, {
 		type: "line",
 		data: {
@@ -67,6 +71,8 @@ export function drawChart(canvas, readings, range, aggregation) {
 					max: range.end.getTime(),
 				},
 				y: {
+					min: yMin,
+					max: yMax,
 					ticks: { callback: (value) => `${value}°` },
 				},
 			},
