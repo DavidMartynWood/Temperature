@@ -151,6 +151,16 @@ export async function getHistory(url: URL, env: Env): Promise<Response> {
 
   const { start, end, echo } = window;
   const dailyExtremes = end.getTime() - start.getTime() >= DAILY_EXTREMES_THRESHOLD_MS;
+  const startingReading = await env.lake_temperature_db
+    .prepare(`
+      SELECT received_at AS timestamp, temperature_c
+      FROM readings
+      WHERE received_at < ?
+      ORDER BY received_at DESC, id DESC
+      LIMIT 1
+    `)
+    .bind(start.toISOString())
+    .first();
   const query = dailyExtremes
     ? `
       SELECT date(received_at) AS date,
@@ -176,6 +186,7 @@ export async function getHistory(url: URL, env: Env): Promise<Response> {
   return Response.json({
     ...echo,
     aggregation: dailyExtremes ? "daily-extremes" : "readings",
+    startingReading: startingReading ?? null,
     readings: result.results,
   });
 }

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getHistory } from "../src/handlers.ts";
 import { EARLIEST_HISTORY_DATE } from "../src/config.ts";
+import { clearChart, drawChart } from "../public/js/chart.js";
 import {
   isValidTemperature,
   isValidTimestamp,
@@ -10,18 +11,22 @@ import {
 } from "../src/validation.ts";
 import { EARLIEST_HISTORY_DATE as clientEarliestHistoryDate } from "../public/js/config.js";
 
-function createDatabase() {
-  const query = { sql: "", bindings: [], results: [] };
+function createDatabase(startingReading = null) {
+  const query = { sql: "", bindings: [], results: [], startingReading, calls: [] };
   return {
     query,
     database: {
       prepare(sql) {
         query.sql = sql;
+        const call = { sql, bindings: [] };
+        query.calls.push(call);
         return {
           bind(...bindings) {
             query.bindings = bindings;
+            call.bindings = bindings;
             return {
               all: async () => ({ results: query.results }),
+              first: async () => query.startingReading,
             };
           },
         };
@@ -97,6 +102,27 @@ describe("history API", () => {
     ]);
   });
 
+  it("returns the latest reading before the requested start as a chart anchor", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-19T12:00:00.000Z"));
+    const startingReading = {
+      timestamp: "2026-10-17T23:55:00.000Z",
+      temperature_c: 14.2,
+    };
+    const { database, query } = createDatabase(startingReading);
+
+    const response = await getHistory(
+      new URL("https://example.test/api/history?from=2026-10-18&to=2026-10-19"),
+      { lake_temperature_db: database },
+    );
+
+    expect((await responseJson(response)).startingReading).toEqual(startingReading);
+    expect(query.calls[0]).toMatchObject({
+      sql: expect.stringContaining("WHERE received_at < ?"),
+      bindings: ["2026-10-18T00:00:00.000Z"],
+    });
+  });
+
   it("switches year-long ranges to daily extremes", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2027-10-17T12:00:00.000Z"));
@@ -126,4 +152,54 @@ describe("history date configuration", () => {
       });
     expect(html).toContain(`History available from ${date} (UTC).`);
   });
+});
+
+describe("history chart", () => {
+  afterEach(() => {
+    clearChart({ setAttribute() {} });
+    vi.unstubAllGlobals();
+  });
+
+  it.each(["readings", "daily-extremes"])(
+    "uses the previous reading as the starting point for %s",
+    (aggregation) => {
+      let chartConfig;
+      vi.stubGlobal("Chart", class {
+        constructor(_canvas, config) {
+          chartConfig = config;
+        }
+        destroy() {}
+      });
+      const range = {
+        start: new Date("2026-10-18T00:00:00.000Z"),
+        end: new Date("2026-10-20T00:00:00.000Z"),
+      };
+      const readings = aggregation === "daily-extremes"
+        ? [{ date: "2026-10-18", min_temperature_c: 12, max_temperature_c: 18 }]
+        : [{ timestamp: "2026-10-18T07:00:00.000Z", temperature_c: 15 }];
+      const startingReading = {
+        timestamp: "2026-10-17T23:55:00.000Z",
+        temperature_c: 14,
+      };
+
+      drawChart(
+        { setAttribute() {} },
+        readings,
+        range,
+        aggregation,
+        startingReading,
+      );
+
+      expect(chartConfig.data.datasets[0].data[0]).toEqual({
+        x: Date.parse(startingReading.timestamp),
+        y: startingReading.temperature_c,
+      });
+      if (aggregation === "daily-extremes") {
+        expect(chartConfig.data.datasets[1].data[0]).toEqual({
+          x: Date.parse(startingReading.timestamp),
+          y: startingReading.temperature_c,
+        });
+      }
+    },
+  );
 });

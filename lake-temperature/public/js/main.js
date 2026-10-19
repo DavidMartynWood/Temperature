@@ -45,11 +45,11 @@ async function showHistory(rangeName) {
 	historyStatus.textContent = "Loading history…";
 
 	try {
-		const { readings, aggregation } = await fetchHistory(range.from, range.to);
+		const { readings, aggregation, startingReading } = await fetchHistory(range.from, range.to);
 		if (requestId !== historyRequest) {
 			return;
 		}
-		const count = drawChart(canvas, readings, range, aggregation);
+		const count = drawChart(canvas, readings, range, aggregation, startingReading);
 		historyStatus.textContent = count === 0
 			? "No readings in this period."
 			: `${count} plotted point${count === 1 ? "" : "s"} · ${range.from} to ${range.to}`;
