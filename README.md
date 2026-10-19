@@ -38,7 +38,7 @@ dotnet test Temperature.slnx --configuration Release
 | `TEMPERATURE_SERIAL_PORT` | `/dev/ttyACM0` | Receiver USB serial device |
 | `TEMPERATURE_LOCAL_ENDPOINT_URL` | `http://192.168.4.162:1880/temperature` | Local reading destination |
 | `LAKE_TEMPERATURE_ENDPOINT_URL` | `https://lake-temperature.davidmartynwood.workers.dev/api/readings` | Cloudflare ingestion URL |
-| `LAKE_TEMPERATURE_API_TOKEN` | unset | ****** for Cloudflare ingestion |
+| `LAKE_TEMPERATURE_API_TOKEN` | unset | API credential for Cloudflare ingestion |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4317` | OpenTelemetry export endpoint |
 
 Environment variables can be set in the shell or through the standard .NET configuration providers. Keep credentials such as the ingestion token out of source control.

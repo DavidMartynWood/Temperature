@@ -1,4 +1,5 @@
 # .NET build output
+[Nn]ode_modules/
 [Bb]in/
 [Oo]bj/
 [Aa]rtifacts/
