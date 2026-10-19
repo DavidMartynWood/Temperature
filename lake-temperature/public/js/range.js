@@ -9,26 +9,21 @@ function toDateString(date) {
 
 /**
  * Converts a range name (day/week/month/year/all) into inclusive UTC dates.
- * `start` and `end` are Dates bounding the chart's time axis in local time
- * (local midnight to local midnight; end is exclusive).
+ * `start` and `end` are Dates bounding the chart's time axis (end is exclusive).
  */
 export function getRange(rangeName) {
-	const now = new Date();
-	const todayUtc = toDateString(now);
-	const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	const today = new Date();
+	today.setUTCHours(0, 0, 0, 0);
 
 	const startMs = rangeName in DAYS_BACK
-		? new Date(localMidnight.getFullYear(), localMidnight.getMonth(), localMidnight.getDate() - DAYS_BACK[rangeName]).getTime()
+		? today.getTime() - DAYS_BACK[rangeName] * DAY_MS
 		: EARLIEST_MS;
 	const start = new Date(Math.max(startMs, EARLIEST_MS));
-	const end = new Date(localMidnight.getFullYear(), localMidnight.getMonth(), localMidnight.getDate() + 1);
 
-	// The API takes UTC dates, so fetch every UTC date overlapping the local range.
-	const lastUtc = toDateString(new Date(end.getTime() - 1));
 	return {
 		from: toDateString(start),
-		to: lastUtc < todayUtc ? lastUtc : todayUtc,
+		to: toDateString(today),
 		start,
-		end,
+		end: new Date(today.getTime() + DAY_MS),
 	};
 }
