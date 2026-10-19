@@ -7,14 +7,13 @@ function toPoints(readings, aggregation) {
 	if (aggregation === "daily-extremes") {
 		const day = (reading) => Date.parse(`${reading.date}T00:00:00.000Z`);
 		return [
-			{ label: "Daily low", color: COLORS.min, radius: 2, data: readings.map((r) => ({ x: day(r), y: r.min_temperature_c })) },
-			{ label: "Daily high", color: COLORS.max, radius: 2, data: readings.map((r) => ({ x: day(r), y: r.max_temperature_c })) },
+			{ label: "Daily low", color: COLORS.min, data: readings.map((r) => ({ x: day(r), y: r.min_temperature_c })) },
+			{ label: "Daily high", color: COLORS.max, data: readings.map((r) => ({ x: day(r), y: r.max_temperature_c })) },
 		];
 	}
 	return [{
 		label: "Temperature",
 		color: COLORS.reading,
-		radius: 3,
 		data: readings.map((r) => ({ x: Date.parse(r.timestamp), y: r.temperature_c })),
 	}];
 }
@@ -54,7 +53,8 @@ export function drawChart(canvas, readings, range, aggregation) {
 				data: s.data,
 				borderColor: s.color,
 				backgroundColor: s.color,
-				pointRadius: s.radius,
+				pointRadius: 0,
+				pointHoverRadius: 0,
 				borderWidth: 2,
 				tension: 0,
 			})),
