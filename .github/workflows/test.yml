@@ -8,6 +8,33 @@ permissions:
   contents: read
 
 jobs:
+  cloudflare-test:
+    name: Test Cloudflare app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lake-temperature
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lake-temperature/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
   dotnet-test:
     name: Run .NET tests
     runs-on: ubuntu-latest

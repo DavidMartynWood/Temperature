@@ -12,10 +12,19 @@ Cloudflare Worker (API + D1 database) and static website showing the current and
 | `src/config.ts` | Constants (earliest history date, limits) |
 | `public/index.html`, `public/styles.css` | Page markup and styles |
 | `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (date ranges), `chart.js` (Chart.js wrapper), `main.js` (wiring) |
-| `public/vendor/` | Vendored Chart.js 4.5.1 and chartjs-adapter-date-fns 3.0.0 (bundle, includes date-fns); loaded as globals, no build step |
+| `public/vendor/` | Vendored browser bundles for Chart.js and its date adapter; loaded as globals, no build step |
 | `migrations/` | D1 schema migrations |
 
-`EARLIEST_HISTORY_DATE` is defined in both `src/config.ts` and `public/js/config.js`; keep them in sync (and the note in `index.html`).
+The earliest history date is present in the Worker, browser configuration, and the page's availability note. The test suite checks these values remain in sync.
+
+## Vendored browser libraries
+
+The files in `public/vendor/` are distributed browser bundles from the upstream npm packages:
+
+- [Chart.js 4.5.1](https://www.npmjs.com/package/chart.js/v/4.5.1), `chart.umd.js`
+- [chartjs-adapter-date-fns 3.0.0](https://www.npmjs.com/package/chartjs-adapter-date-fns/v/3.0.0), `chartjs-adapter-date-fns.bundle.min.js` (includes date-fns)
+
+To update them, obtain the browser bundle from the corresponding upstream package version, replace the vendored file, review its license and runtime compatibility, and update this inventory. Keep the existing `public/vendor/chartjs-LICENSE.md` with the Chart.js distribution.
 
 ## API
 
@@ -32,6 +41,7 @@ echo 'INGEST_TOKEN=local-secret' > .dev.vars   # git-ignored
 npx wrangler d1 migrations apply lake-temperature-db --local
 npm run dev
 npm run typecheck
+npm test
 ```
 
-Deployment happens from `main` via `.github/workflows/deploy.yml`.
+The PR workflow runs both `npm run typecheck` and `npm test`. Deployment happens from `main` via `.github/workflows/deploy.yml`.
