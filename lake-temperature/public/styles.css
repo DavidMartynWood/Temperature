@@ -120,3 +120,12 @@ h1 {
 		height: 16rem;
 	}
 }
+
+#logo {
+	display: block;
+	margin: 0 auto 0.5rem;
+}
+
+#motto {
+	font-size: 1.1rem;
+}

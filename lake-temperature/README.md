@@ -1,4 +1,4 @@
-# Lake temperature
+# Ice Warriors water temperature
 
 Cloudflare Worker (API + D1 database) and static website showing the current and historical lake water temperature.
 
