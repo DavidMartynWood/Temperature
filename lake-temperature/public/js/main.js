@@ -1,14 +1,27 @@
 import { fetchHistory, fetchLatestReading } from "./api.js";
 import { clearChart, drawChart } from "./chart.js";
+import { STALE_READING_MS } from "./config.js";
 import { getRange } from "./range.js";
 
 const temperature = document.querySelector("#temperature");
 const readingTime = document.querySelector("#reading-time");
 const timestamp = document.querySelector("#timestamp");
+const staleWarning = document.querySelector("#stale-warning");
+const staleWarningButton = document.querySelector("#stale-warning-button");
+const staleWarningMessage = document.querySelector("#stale-warning-message");
 const canvas = document.querySelector("#chart");
 const historyStatus = document.querySelector("#history-status");
 const rangeButtons = document.querySelectorAll("[data-range]");
 let historyRequest = 0;
+
+function setStaleMessageVisible(visible) {
+	staleWarningMessage.hidden = !visible;
+	staleWarningButton.setAttribute("aria-expanded", String(visible));
+}
+
+staleWarningButton.addEventListener("click", () => {
+	setStaleMessageVisible(staleWarningMessage.hidden);
+});
 
 async function showLatestReading() {
 	try {
@@ -29,6 +42,11 @@ async function showLatestReading() {
 		)} °C`;
 		timestamp.dateTime = date.toISOString();
 		timestamp.textContent = date.toLocaleString();
+		const isStale = Date.now() - date.getTime() > STALE_READING_MS;
+		staleWarning.hidden = !isStale;
+		if (!isStale) {
+			setStaleMessageVisible(false);
+		}
 		readingTime.hidden = false;
 	} catch {
 		temperature.textContent = "Temperature unavailable";

@@ -13,7 +13,11 @@
 			<p id="temperature" aria-live="polite">Loading…</p>
 			<p id="reading-time" hidden>
 				Reading time: <time id="timestamp"></time>
+				<span id="stale-warning" hidden>
+					<button type="button" id="stale-warning-button" class="stale-warning" title="This reading is out of date, there may be a technical problem" aria-label="This reading is out of date, there may be a technical problem" aria-expanded="false" aria-controls="stale-warning-message">⚠️</button>
+				</span>
 			</p>
+			<p id="stale-warning-message" class="stale-warning-message" role="status" hidden>This reading is out of date, there may be a technical problem</p>
 			<section id="history" aria-labelledby="history-title">
 				<h2 id="history-title">Temperature history</h2>
 				<div id="range-controls" role="group" aria-label="History range">
