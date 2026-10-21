@@ -30,6 +30,20 @@
 					"database_id": "89f17196-6ad4-4005-8ac5-714f946b7071"
 				}
 			]
+		},
+		// QA: separate Worker with its own D1 database pre-populated with predicted readings.
+		// Create the database with `npx wrangler d1 create lake-temperature-qa-db` and replace database_id below.
+		"qa": {
+			"name": "lake-temperature-qa",
+			"vars": { "READ_ONLY": "true" },
+			"d1_databases": [
+				{
+					"binding": "lake_temperature_db",
+					"database_name": "lake-temperature-qa-db",
+					"database_id": "REPLACE_WITH_QA_DATABASE_ID",
+					"migrations_dir": "migrations"
+				}
+			]
 		}
 	}
 }

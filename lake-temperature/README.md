@@ -45,3 +45,7 @@ npm test
 ```
 
 The PR workflow runs both `npm run typecheck` and `npm test`. Deployment happens from `main` via `.github/workflows/deploy.yml`.
+
+## QA instance
+
+A third Worker, `lake-temperature-qa`, uses its own D1 database (`lake-temperature-qa-db`) pre-populated with predicted hourly readings for the next year (`scripts/generate-qa-seed.mjs`). It is read-only. One-time setup: run `npx wrangler d1 create lake-temperature-qa-db` and put the returned id in the `qa` env in `wrangler.jsonc`. Then run the "Deploy QA" workflow (manual) to migrate, reseed and deploy. Because the data is in the future, use the `hours` or `from`/`to` APIs with care: `to` cannot be after today.
