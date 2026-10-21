@@ -1,5 +1,8 @@
+import { convertTemperature, UNITS } from "./insights.js";
+
 // Chart.js and its date-fns adapter are loaded as globals (see /vendor/).
-const COLORS = { reading: "#176b65", min: "#2875a5", max: "#d06a37" };
+const COLORS = { reading: "#0b7285", min: "#2875a5", max: "#d06a37" };
+const DEFAULT_THEME = { text: "#3d5a5c", grid: "#d9e5e6" };
 
 let chart = null;
 
@@ -8,7 +11,7 @@ function toPoints(readings, aggregation) {
 		const day = (reading) => Date.parse(`${reading.date}T00:00:00.000Z`);
 		return [
 			{ label: "Daily low", color: COLORS.min, data: readings.map((r) => ({ x: day(r), y: r.min_temperature_c })) },
-			{ label: "Daily high", color: COLORS.max, data: readings.map((r) => ({ x: day(r), y: r.max_temperature_c })) },
+			{ label: "Daily high", color: COLORS.max, dash: [6, 4], data: readings.map((r) => ({ x: day(r), y: r.max_temperature_c })) },
 		];
 	}
 	return [{
@@ -23,19 +26,23 @@ function toPoints(readings, aggregation) {
  * @param readings rows from /api/history
  * @param range    result of getRange()
  * @param aggregation "readings" or "daily-extremes"
+ * @param options { unit: "C" | "F", theme: { text, grid } }
  */
-export function drawChart(canvas, readings, range, aggregation, startingReading = null) {
+export function drawChart(canvas, readings, range, aggregation, startingReading = null, options = {}) {
+	const unit = options.unit === "F" ? "F" : "C";
+	const theme = { ...DEFAULT_THEME, ...options.theme };
+	const convert = (celsius) => convertTemperature(celsius, unit);
 	const daily = aggregation === "daily-extremes";
 	const series = toPoints(readings, aggregation).map((s) => ({
 		...s,
-		data: s.data.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)),
+		data: s.data.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)).map((p) => ({ x: p.x, y: convert(p.y) })),
 	}));
 	const count = series.reduce((total, s) => total + s.data.length, 0);
 
 	clearChart(canvas);
 	canvas.setAttribute(
 		"aria-label",
-		daily ? "Daily low and high temperatures in degrees Celsius" : "Temperature readings in degrees Celsius",
+		daily ? `Daily low and high temperatures in degrees ${unit === "F" ? "Fahrenheit" : "Celsius"}` : `Temperature readings in degrees ${unit === "F" ? "Fahrenheit" : "Celsius"}`,
 	);
 	if (count === 0) {
 		return 0;
@@ -52,7 +59,7 @@ export function drawChart(canvas, readings, range, aggregation, startingReading 
 	) {
 		const startingPoint = {
 			x: Date.parse(startingReading.timestamp),
-			y: startingReading.temperature_c,
+			y: convert(startingReading.temperature_c),
 		};
 		for (const s of series) {
 			s.data.unshift(startingPoint);
@@ -66,35 +73,43 @@ export function drawChart(canvas, readings, range, aggregation, startingReading 
 				label: s.label,
 				data: s.data,
 				borderColor: s.color,
-				backgroundColor: s.color,
+				backgroundColor: daily ? s.color : `${s.color}26`,
 				pointRadius: 0,
-				pointHoverRadius: 0,
-				borderWidth: 2,
+				pointHoverRadius: 5,
+				pointHitRadius: 12,
+				borderWidth: 2.5,
+				borderDash: s.dash ?? [],
 				tension: 0,
+				fill: daily ? false : "start",
 			})),
 		},
 		options: {
 			responsive: true,
 			maintainAspectRatio: false,
 			animation: false,
+			parsing: false,
 			interaction: { mode: "nearest", axis: "x", intersect: false },
 			scales: {
 				x: {
 					type: "time",
 					min: range.start.getTime(),
 					max: range.end.getTime(),
+					ticks: { color: theme.text, maxRotation: 0, autoSkipPadding: 24 },
+					grid: { color: theme.grid },
 				},
 				y: {
 					min: yMin,
 					max: yMax,
-					ticks: { callback: (value) => `${value}°` },
+					ticks: { color: theme.text, callback: (value) => `${value}°` },
+					grid: { color: theme.grid },
 				},
 			},
 			plugins: {
-				legend: { display: daily },
+				legend: { display: daily, labels: { color: theme.text, usePointStyle: true } },
+				decimation: { enabled: true, algorithm: "lttb", samples: 400 },
 				tooltip: {
 					callbacks: {
-						label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(1)} °C`,
+						label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(1)} ${UNITS[unit]}`,
 					},
 				},
 			},

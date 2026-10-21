@@ -3,35 +3,84 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="theme-color" content="#f2f6f5" />
+		<meta name="theme-color" content="#eaf4f6" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
+		<meta name="description" content="Current lake water temperature with trend and history." />
 		<title>Lake temperature</title>
+		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
+		<a class="skip-link" href="#current">Skip to current temperature</a>
 		<main>
-			<h1>Lake temperature</h1>
-			<p id="temperature" aria-live="polite">Loading…</p>
-			<p id="reading-time" hidden>
-				Reading time: <time id="timestamp"></time>
-				<span id="stale-warning" hidden>
-					<button type="button" id="stale-warning-button" class="stale-warning" title="This reading is out of date, there may be a technical problem" aria-label="This reading is out of date, there may be a technical problem" aria-expanded="false" aria-controls="stale-warning-message">⚠️</button>
-				</span>
-			</p>
-			<p id="stale-warning-message" class="stale-warning-message" role="status" hidden>This reading is out of date, there may be a technical problem</p>
-			<section id="history" aria-labelledby="history-title">
-				<h2 id="history-title">Temperature history</h2>
-				<div id="range-controls" role="group" aria-label="History range">
-					<button type="button" data-range="day" aria-pressed="true">Day</button>
-					<button type="button" data-range="week" aria-pressed="false">Week</button>
-					<button type="button" data-range="month" aria-pressed="false">Month</button>
-					<button type="button" data-range="year" aria-pressed="false">Year</button>
-					<button type="button" data-range="all" aria-pressed="false">All</button>
+			<header class="page-header">
+				<h1>Lake temperature</h1>
+				<div class="toolbar">
+					<div class="segmented" id="unit-controls" role="group" aria-label="Temperature unit">
+						<button type="button" data-unit="C" aria-pressed="true">°C</button>
+						<button type="button" data-unit="F" aria-pressed="false">°F</button>
+					</div>
+					<button type="button" id="theme-toggle" class="icon-button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
+						<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+					</button>
+				</div>
+			</header>
+
+			<section id="current" class="card hero" aria-labelledby="current-title" tabindex="-1">
+				<h2 id="current-title" class="eyebrow">Current water temperature</h2>
+				<p id="temperature" class="hero-temperature" aria-live="polite" aria-atomic="true"><span class="loading-text">Loading…</span></p>
+				<p id="condition" class="badge" hidden><span id="condition-symbol" aria-hidden="true"></span> <span id="condition-text"></span></p>
+				<p id="condition-hint" class="hint" hidden></p>
+				<p id="reading-time" class="reading-time" hidden>
+					<span id="status-dot" class="status-dot" aria-hidden="true"></span>
+					Updated <time id="timestamp"></time>
+				</p>
+				<p id="stale-warning-message" class="stale-banner" role="status" hidden>
+					<span aria-hidden="true">⚠</span> Offline? This reading is out of date, so there may be a technical problem with the sensor.
+				</p>
+				<p id="error-message" class="stale-banner" role="alert" hidden></p>
+			</section>
+
+			<section id="stats" class="stats" aria-label="Last 24 hours at a glance">
+				<div class="card stat">
+					<h3>Trend</h3>
+					<p id="trend" class="stat-value">–</p>
+					<p id="trend-detail" class="stat-detail">Last 3 hours</p>
+				</div>
+				<div class="card stat">
+					<h3>24h low</h3>
+					<p id="stat-min" class="stat-value">–</p>
+				</div>
+				<div class="card stat">
+					<h3>24h high</h3>
+					<p id="stat-max" class="stat-value">–</p>
+				</div>
+				<div class="card stat">
+					<h3>24h average</h3>
+					<p id="stat-average" class="stat-value">–</p>
+				</div>
+			</section>
+
+			<section id="history" class="card" aria-labelledby="history-title">
+				<div class="history-header">
+					<h2 id="history-title">Temperature history</h2>
+					<div id="range-controls" class="segmented" role="group" aria-label="History range">
+						<button type="button" data-range="day" aria-pressed="true">24h</button>
+						<button type="button" data-range="week" aria-pressed="false">7d</button>
+						<button type="button" data-range="month" aria-pressed="false">30d</button>
+						<button type="button" data-range="year" aria-pressed="false">1y</button>
+						<button type="button" data-range="all" aria-pressed="false">All</button>
+					</div>
 				</div>
 				<div id="chart-container">
 					<canvas id="chart" role="img" aria-label="Loading temperature history"></canvas>
+					<div id="chart-overlay" class="chart-overlay" hidden>
+						<p id="chart-overlay-text"></p>
+						<button type="button" id="retry-history" hidden>Try again</button>
+					</div>
 				</div>
 				<p id="history-status" aria-live="polite"></p>
-				<p>History available from 18 October 2026.</p>
+				<p class="note">History available from 18 October 2026.</p>
 			</section>
 			<footer id="social-links">
 				<p>
@@ -59,8 +108,8 @@
 				</p>
 			</footer>
 		</main>
-		<script src="/vendor/chart.umd.js"></script>
-		<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+		<script src="/vendor/chart.umd.js" defer></script>
+		<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js" defer></script>
 		<script type="module" src="/js/main.js"></script>
 	</body>
 </html>
