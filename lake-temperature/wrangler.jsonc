@@ -16,13 +16,20 @@
 			"binding": "lake_temperature_db",
 			"database_name": "lake-temperature-db",
 			"database_id": "89f17196-6ad4-4005-8ac5-714f946b7071"
+		},
+		{
+			"binding": "lake_temperature_qa_db",
+			"database_name": "lake-temperature-qa-db",
+			"database_id": "a38de82c-ac9d-4e96-87a3-1ec7b4ae0d94"
 		}
 	],
 	// PR preview deployments: separate Worker, same prod D1 database, writes disabled in code.
 	"env": {
 		"dev": {
 			"name": "lake-temperature-dev",
-			"vars": { "READ_ONLY": "true" },
+			"vars": {
+				"READ_ONLY": "true"
+			},
 			"d1_databases": [
 				{
 					"binding": "lake_temperature_db",
@@ -35,12 +42,15 @@
 		// Create the database with `npx wrangler d1 create lake-temperature-qa-db` and replace database_id below.
 		"qa": {
 			"name": "lake-temperature-qa",
-			"vars": { "READ_ONLY": "true", "EARLIEST_HISTORY_DATE": "2025-01-01" },
+			"vars": {
+				"READ_ONLY": "true",
+				"EARLIEST_HISTORY_DATE": "2025-01-01"
+			},
 			"d1_databases": [
 				{
 					"binding": "lake_temperature_db",
 					"database_name": "lake-temperature-qa-db",
-					"database_id": "REPLACE_WITH_QA_DATABASE_ID",
+					"database_id": "a38de82c-ac9d-4e96-87a3-1ec7b4ae0d94",
 					"migrations_dir": "migrations"
 				}
 			]
