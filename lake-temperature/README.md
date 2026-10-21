@@ -11,11 +11,24 @@ Cloudflare Worker (API + D1 database) and static website showing the current and
 | `src/validation.ts` | Input validation helpers |
 | `src/config.ts` | Constants (earliest history date, limits) |
 | `public/index.html`, `public/styles.css` | Page markup and styles |
-| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (date ranges), `chart.js` (Chart.js wrapper), `main.js` (wiring) |
+| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring) |
 | `public/vendor/` | Vendored browser bundles for Chart.js and its date adapter; loaded as globals, no build step |
 | `migrations/` | D1 schema migrations |
 
 The earliest history date is present in the Worker, browser configuration, and the page's availability note. The test suite checks these values remain in sync.
+
+## Website UI
+
+The page is built for people who want to know the current lake temperature at a glance:
+
+- **Hero card**: a very large current temperature, a °C/°F toggle (remembered in `localStorage`), a Cold / Cool / Comfortable / Warm label (cut-offs in `public/js/insights.js`), and a relative "last updated" time with the exact timestamp on hover. Readings older than 12 hours show an offline warning.
+- **At a glance**: trend over the last 3 hours (rising / falling / steady) and the 24h low, high and average.
+- **History chart**: 24h, 7d and 30d rolling windows plus 1y and All, with tooltips and loading, empty and error (with retry) states.
+- **Accessibility**: semantic landmarks, ARIA labels, visible focus, skip link, AA contrast, reduced-motion support. Meaning is never conveyed by colour alone: labels use text plus symbols and different border styles, trend uses arrows, stale data uses a text banner and a different marker shape, and chart series use different line styles.
+- **Theme**: follows `prefers-color-scheme`, with a manual light/dark toggle remembered in `localStorage`.
+- **Auto-refresh**: the latest reading refreshes every minute and history every five minutes while the tab is visible; no page reload is needed.
+
+To capture screenshots, run `npm run dev`, open the local URL, and take light and dark mode screenshots at mobile (about 390px) and desktop widths.
 
 ## Vendored browser libraries
 

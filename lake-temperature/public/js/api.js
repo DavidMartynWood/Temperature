@@ -18,8 +18,11 @@ export async function fetchLatestReading() {
 	return reading;
 }
 
-/** Returns { readings, aggregation } for an inclusive UTC date range (YYYY-MM-DD). */
-export function fetchHistory(from, to) {
-	const parameters = new URLSearchParams({ from, to });
+/**
+ * Returns { readings, aggregation, startingReading } for a rolling number of hours,
+ * or for an inclusive UTC date range (YYYY-MM-DD) when `hours` is not given.
+ */
+export function fetchHistory(from, to, hours = null) {
+	const parameters = new URLSearchParams(hours ? { hours } : { from, to });
 	return getJson(`/api/history?${parameters}`, "Could not load temperature history");
 }
