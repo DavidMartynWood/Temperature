@@ -1,9 +1,10 @@
-// Writes SQL that fills the QA database with predicted hourly readings for the next year.
+// Writes SQL that fills the QA database with synthetic hourly readings for the last year (no future dates).
 // Usage: node scripts/generate-qa-seed.mjs > qa-seed.sql
 const HOURS = 24 * 365;
 const HOUR_MS = 3600 * 1000;
-const start = new Date();
-start.setUTCMinutes(0, 0, 0);
+const end = new Date();
+end.setUTCMinutes(0, 0, 0);
+const start = new Date(end.getTime() - (HOURS - 1) * HOUR_MS);
 
 const rows = [];
 for (let i = 0; i < HOURS; i++) {

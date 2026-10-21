@@ -3,7 +3,6 @@ import {
   DAY_MS,
   DEFAULT_HISTORY_HOURS,
   EARLIEST_HISTORY_DATE,
-  EARLIEST_HISTORY_TIMESTAMP,
   HOUR_MS,
 } from "./config";
 import {
@@ -18,8 +17,13 @@ function jsonError(message: string, status: number): Response {
   return Response.json({ error: message }, { status });
 }
 
-export function health(): Response {
-  return Response.json({ status: "ok" });
+function earliestHistoryDate(env: Env): string {
+  const override = env.EARLIEST_HISTORY_DATE;
+  return override && parseDate(override) !== null ? override : EARLIEST_HISTORY_DATE;
+}
+
+export function health(env: Env): Response {
+  return Response.json({ status: "ok", earliestHistoryDate: earliestHistoryDate(env) });
 }
 
 /** POST /api/readings - authenticated ingestion of a single reading. */
@@ -95,7 +99,8 @@ interface HistoryWindow {
 }
 
 /** Resolves ?from=&to= (inclusive UTC dates) or ?hours= into a time window. */
-function resolveHistoryWindow(url: URL): HistoryWindow | Response {
+function resolveHistoryWindow(url: URL, env: Env): HistoryWindow | Response {
+  const earliestDate = earliestHistoryDate(env);
   const fromParam = url.searchParams.get("from");
   const toParam = url.searchParams.get("to");
 
@@ -107,12 +112,12 @@ function resolveHistoryWindow(url: URL): HistoryWindow | Response {
     if (
       fromParam === null || toParam === null ||
       from === null || to === null ||
-      fromParam < EARLIEST_HISTORY_DATE ||
+      fromParam < earliestDate ||
       toParam < fromParam ||
       toParam > today
     ) {
       return jsonError(
-        `from and to must be dates from ${EARLIEST_HISTORY_DATE} through today, with from on or before to`,
+        `from and to must be dates from ${earliestDate} through today, with from on or before to`,
         400,
       );
     }
@@ -135,7 +140,7 @@ function resolveHistoryWindow(url: URL): HistoryWindow | Response {
   return {
     start: new Date(Math.max(
       now - hours * HOUR_MS,
-      Date.parse(EARLIEST_HISTORY_TIMESTAMP),
+      Date.parse(`${earliestDate}T00:00:00.000Z`),
     )),
     end: new Date(now),
     echo: { hours },
@@ -144,7 +149,7 @@ function resolveHistoryWindow(url: URL): HistoryWindow | Response {
 
 /** GET /api/history - raw readings, or daily min/max for long ranges. */
 export async function getHistory(url: URL, env: Env): Promise<Response> {
-  const window = resolveHistoryWindow(url);
+  const window = resolveHistoryWindow(url, env);
   if (window instanceof Response) {
     return window;
   }

@@ -1,6 +1,6 @@
-import { fetchHistory, fetchLatestReading } from "./api.js";
+import { fetchEarliestHistoryDate, fetchHistory, fetchLatestReading } from "./api.js";
 import { clearChart, drawChart } from "./chart.js";
-import { STALE_READING_MS } from "./config.js";
+import { EARLIEST_HISTORY_DATE, STALE_READING_MS } from "./config.js";
 import { getRange } from "./range.js";
 
 const temperature = document.querySelector("#temperature");
@@ -13,6 +13,12 @@ const canvas = document.querySelector("#chart");
 const historyStatus = document.querySelector("#history-status");
 const rangeButtons = document.querySelectorAll("[data-range]");
 let historyRequest = 0;
+let earliestDatePromise;
+
+function getEarliestDate() {
+	earliestDatePromise ??= fetchEarliestHistoryDate().catch(() => EARLIEST_HISTORY_DATE);
+	return earliestDatePromise;
+}
 
 function setStaleMessageVisible(visible) {
 	staleWarningMessage.hidden = !visible;
@@ -58,9 +64,12 @@ async function showHistory(rangeName) {
 	for (const button of rangeButtons) {
 		button.setAttribute("aria-pressed", String(button.dataset.range === rangeName));
 	}
-	const range = getRange(rangeName);
 	clearChart(canvas);
 	historyStatus.textContent = "Loading history…";
+	const range = getRange(rangeName, await getEarliestDate());
+	if (requestId !== historyRequest) {
+		return;
+	}
 
 	try {
 		const { readings, aggregation, startingReading } = await fetchHistory(range.from, range.to);
