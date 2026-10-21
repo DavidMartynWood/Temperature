@@ -120,3 +120,8 @@ h1 {
 		height: 16rem;
 	}
 }
+
+.stale-warning {
+	cursor: help;
+	margin-left: 0.25em;
+}
