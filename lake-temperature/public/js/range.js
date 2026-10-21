@@ -1,6 +1,5 @@
 import { DAY_MS, EARLIEST_HISTORY_DATE } from "./config.js";
 
-const EARLIEST_MS = Date.parse(`${EARLIEST_HISTORY_DATE}T00:00:00.000Z`);
 const ROLLING_HOURS = { day: 24, week: 24 * 7, month: 24 * 30 };
 const DAYS_BACK = { year: 364 };
 
@@ -13,7 +12,8 @@ function toDateString(date) {
  * Day, week and month are rolling windows (`hours` is set); year and all use inclusive UTC dates.
  * `start` and `end` are Dates bounding the chart's time axis.
  */
-export function getRange(rangeName, now = new Date()) {
+export function getRange(rangeName, earliestDate = EARLIEST_HISTORY_DATE, now = new Date()) {
+	const EARLIEST_MS = Date.parse(`${earliestDate}T00:00:00.000Z`);
 	if (rangeName in ROLLING_HOURS) {
 		const hours = ROLLING_HOURS[rangeName];
 		const start = new Date(Math.max(now.getTime() - hours * 3600000, EARLIEST_MS));

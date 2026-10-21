@@ -46,8 +46,8 @@ describe("insights", () => {
 describe("history ranges", () => {
   it("uses rolling windows for day, week and month", () => {
     const now = new Date("2026-11-20T12:00:00.000Z");
-    expect(getRange("day", now)).toMatchObject({ hours: 24, end: now });
-    expect(getRange("month", now).hours).toBe(720);
-    expect(getRange("all", now).hours).toBeUndefined();
+    expect(getRange("day", undefined, now)).toMatchObject({ hours: 24, end: now });
+    expect(getRange("month", undefined, now).hours).toBe(720);
+    expect(getRange("all", undefined, now).hours).toBeUndefined();
   });
 });

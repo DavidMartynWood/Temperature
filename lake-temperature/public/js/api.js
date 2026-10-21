@@ -6,6 +6,12 @@ async function getJson(url, errorMessage) {
 	return response.json();
 }
 
+/** Returns the earliest date (YYYY-MM-DD) for which history may be requested. */
+export async function fetchEarliestHistoryDate() {
+	const { earliestHistoryDate } = await getJson("/api/health", "Could not load configuration");
+	return earliestHistoryDate;
+}
+
 /** Returns the latest reading ({ timestamp, temperature_c }) or null. */
 export async function fetchLatestReading() {
 	const { reading } = await getJson("/api/latest", "Could not load the latest reading");

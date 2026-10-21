@@ -1,6 +1,6 @@
-import { fetchHistory, fetchLatestReading } from "./api.js";
+import { fetchEarliestHistoryDate, fetchHistory, fetchLatestReading } from "./api.js";
 import { clearChart, drawChart } from "./chart.js";
-import { STALE_READING_MS } from "./config.js";
+import { EARLIEST_HISTORY_DATE, STALE_READING_MS } from "./config.js";
 import {
 	describeTemperature,
 	formatRelativeTime,
@@ -14,6 +14,13 @@ import { getRange } from "./range.js";
 const LATEST_REFRESH_MS = 60 * 1000;
 const HISTORY_REFRESH_MS = 5 * 60 * 1000;
 const RELATIVE_TIME_REFRESH_MS = 30 * 1000;
+
+let earliestDatePromise;
+
+function getEarliestDate() {
+	earliestDatePromise ??= fetchEarliestHistoryDate().catch(() => EARLIEST_HISTORY_DATE);
+	return earliestDatePromise;
+}
 
 const $ = (selector) => document.querySelector(selector);
 const hero = $("#current");
@@ -190,7 +197,7 @@ async function refreshLatest() {
 
 async function refreshLast24h() {
 	try {
-		const range = getRange("day");
+		const range = getRange("day", await getEarliestDate());
 		state.last24h = await fetchHistory(range.from, range.to, range.hours);
 		renderTemperatureUnits();
 		renderTrend();
@@ -236,12 +243,15 @@ async function showHistory(rangeName, { quiet = false } = {}) {
 	for (const button of rangeButtons) {
 		button.setAttribute("aria-pressed", String(button.dataset.range === rangeName));
 	}
-	const range = getRange(rangeName);
 	if (!quiet) {
 		state.history = null;
 		clearChart(canvas);
 		historyStatus.textContent = "";
 		setOverlay("loading", "Loading history…");
+	}
+	const range = getRange(rangeName, await getEarliestDate());
+	if (requestId !== state.historyRequest) {
+		return;
 	}
 
 	try {
