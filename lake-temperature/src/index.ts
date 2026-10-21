@@ -7,7 +7,7 @@ export default {
 
     switch (route) {
       case "GET /api/health":
-        return health();
+        return health(env);
       case "POST /api/readings":
         return postReading(request, env);
       case "GET /api/latest":

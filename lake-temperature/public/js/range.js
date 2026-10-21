@@ -1,6 +1,5 @@
 import { DAY_MS, EARLIEST_HISTORY_DATE } from "./config.js";
 
-const EARLIEST_MS = Date.parse(`${EARLIEST_HISTORY_DATE}T00:00:00.000Z`);
 const DAYS_BACK = { day: 0, week: 6, month: 29, year: 364 };
 
 function toDateString(date) {
@@ -11,7 +10,8 @@ function toDateString(date) {
  * Converts a range name (day/week/month/year/all) into inclusive UTC dates.
  * `start` and `end` are Dates bounding the chart's time axis (end is exclusive).
  */
-export function getRange(rangeName) {
+export function getRange(rangeName, earliestDate = EARLIEST_HISTORY_DATE) {
+	const EARLIEST_MS = Date.parse(`${earliestDate}T00:00:00.000Z`);
 	const today = new Date();
 	today.setUTCHours(0, 0, 0, 0);
 
