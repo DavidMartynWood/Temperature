@@ -89,7 +89,7 @@ void setup()
 
     // Start LoRa
     Serial.println("Starting Radio.Rx");
-    Radio.Rx(0);
+    Radio.RxBoosted(0);
 }
 
 void loop()
@@ -106,7 +106,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
             "{\"error\":\"Invalid payload size\",\"size\":%u}\n",
             size
         );
-        Radio.Rx(0);
+        Radio.RxBoosted(0);
         return;
     }
 
@@ -120,7 +120,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
             "{\"error\":\"Unsupported protocol version\",\"version\":%u}\n",
             version
         );
-        Radio.Rx(0);
+        Radio.RxBoosted(0);
         return;
     }
 
@@ -176,19 +176,19 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr)
     Serial.println("}}");
 
     // Continue listening for the next packet.
-    Radio.Rx(0);
+    Radio.RxBoosted(0);
 }
 
 /** @brief Radio receive timeout */
 void OnRxTimeout(void)
 {
     Serial.println("OnRxTimeout");
-    Radio.Rx(0);
+    Radio.RxBoosted(0);
 }
 
 /** @brief Radio receive error */
 void OnRxError(void)
 {
     Serial.println("OnRxError");
-    Radio.Rx(0);
+    Radio.RxBoosted(0);
 }
