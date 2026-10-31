@@ -52,15 +52,28 @@ jobs:
         id: count
         run: |
           npx wrangler d1 execute lake-temperature-db --remote --json \
-            --command "SELECT COUNT(*) AS n, MIN(received_at) AS first, MAX(received_at) AS last FROM readings WHERE received_at >= '$START' AND received_at < '$END'" > count.json
-          n=$(node -p 'JSON.parse(require("fs").readFileSync("count.json"))[0].results[0].n')
-          echo "count=$n" >> "$GITHUB_OUTPUT"
-          {
-            echo "## Readings pending deletion"
-            echo "Range: \`$START\` (inclusive) to \`$END\` (exclusive)"
-            echo ""
-            echo "**$n rows** will be deleted from production once approved."
-          } >> "$GITHUB_STEP_SUMMARY"
+            --command "WITH matching AS (SELECT id, received_at, temperature_c FROM readings WHERE received_at >= '$START' AND received_at < '$END') SELECT COUNT(*) AS n, (SELECT received_at FROM matching ORDER BY received_at ASC, id ASC LIMIT 1) AS first_received_at, (SELECT temperature_c FROM matching ORDER BY received_at ASC, id ASC LIMIT 1) AS first_temperature_c, (SELECT received_at FROM matching ORDER BY received_at DESC, id DESC LIMIT 1) AS last_received_at, (SELECT temperature_c FROM matching ORDER BY received_at DESC, id DESC LIMIT 1) AS last_temperature_c FROM matching" > count.json
+          node <<'NODE'
+          const fs = require("node:fs");
+          const result = JSON.parse(fs.readFileSync("count.json"))[0].results[0];
+          const values = {
+            count: result.n,
+            first_received_at: result.first_received_at ?? "none",
+            first_temperature_c: result.first_temperature_c ?? "none",
+            last_received_at: result.last_received_at ?? "none",
+            last_temperature_c: result.last_temperature_c ?? "none",
+          };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(values).map(([key, value]) => `${key}=${value}`).join("\n") + "\n");
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
+            "## Readings pending deletion",
+            `Range: \`${process.env.START}\` (inclusive) to \`${process.env.END}\` (exclusive)`,
+            "",
+            `**${values.count} rows** will be deleted from production once approved.`,
+            `First: \`${values.first_received_at}\` — ${values.first_temperature_c} °C`,
+            `Last: \`${values.last_received_at}\` — ${values.last_temperature_c} °C`,
+            "",
+          ].join("\n"));
+          NODE
 
   delete:
     name: Delete ${{ needs.preview.outputs.count }} rows (requires approval)
