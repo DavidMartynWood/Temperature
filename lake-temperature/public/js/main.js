@@ -9,7 +9,7 @@ import {
 	summarise,
 	UNITS,
 } from "./insights.js";
-import { getRange } from "./range.js";
+import { getRange, getYesterdayRange } from "./range.js";
 
 const LATEST_REFRESH_MS = 60 * 1000;
 const HISTORY_REFRESH_MS = 5 * 60 * 1000;
@@ -249,8 +249,19 @@ async function showHistory(rangeName, { quiet = false } = {}) {
 		historyStatus.textContent = "";
 		setOverlay("loading", "Loading history…");
 	}
-	const range = getRange(rangeName, await getEarliestDate());
+	const earliestDate = await getEarliestDate();
+	const range = rangeName === "yesterday"
+		? getYesterdayRange(earliestDate)
+		: getRange(rangeName, earliestDate);
 	if (requestId !== state.historyRequest) {
+		return;
+	}
+	if (!range) {
+		state.history = null;
+		clearChart(canvas);
+		canvas.setAttribute("aria-label", "No temperature history available for yesterday");
+		historyStatus.textContent = "";
+		setOverlay("empty", "No readings in this period.");
 		return;
 	}
 

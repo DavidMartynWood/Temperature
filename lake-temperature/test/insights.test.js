@@ -6,7 +6,7 @@ import {
   getTrend,
   summarise,
 } from "../public/js/insights.js";
-import { getRange } from "../public/js/range.js";
+import { getRange, getYesterdayRange } from "../public/js/range.js";
 
 describe("insights", () => {
   it("converts Celsius to Fahrenheit", () => {
@@ -49,5 +49,17 @@ describe("history ranges", () => {
     expect(getRange("day", undefined, now)).toMatchObject({ hours: 24, end: now });
     expect(getRange("month", undefined, now).hours).toBe(720);
     expect(getRange("all", undefined, now).hours).toBeUndefined();
+  });
+
+  it("returns the previous UTC day for yesterday's range", () => {
+    const now = new Date("2026-11-20T00:30:00.000Z");
+    const range = getYesterdayRange("2026-10-18", now);
+    expect(range).toMatchObject({
+      from: "2026-11-19",
+      to: "2026-11-19",
+      start: new Date("2026-11-19T00:00:00.000Z"),
+      end: new Date("2026-11-20T00:00:00.000Z"),
+    });
+    expect(getYesterdayRange("2026-11-20", now)).toBeNull();
   });
 });
