@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "lake-temperature/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:

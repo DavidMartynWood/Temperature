@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "lake-temperature/**"
+      - ".github/workflows/preview.yml"
 
 permissions:
   contents: read
