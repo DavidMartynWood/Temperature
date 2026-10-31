@@ -266,6 +266,46 @@ h1 {
 	font-size: 0.85rem;
 }
 
+/* Yesterday */
+.yesterday {
+	padding: 1rem;
+}
+
+.yesterday[hidden] {
+	display: none;
+}
+
+.yesterday-values {
+	display: flex;
+	justify-content: space-between;
+	margin: 0.5rem 0;
+	font-size: 1.4rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.yesterday-label {
+	color: var(--muted);
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.range-bar {
+	position: relative;
+	height: 0.6rem;
+	margin-bottom: 0.5rem;
+	border-radius: 999px;
+	background: var(--border);
+}
+
+.range-bar-fill {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	border-radius: 999px;
+	background: linear-gradient(90deg, #3b82f6, #f59e0b);
+}
+
 /* History */
 .history-header {
 	display: flex;
