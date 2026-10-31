@@ -14,7 +14,6 @@ import { getRange, getYesterdayRange } from "./range.js";
 const LATEST_REFRESH_MS = 60 * 1000;
 const HISTORY_REFRESH_MS = 5 * 60 * 1000;
 const RELATIVE_TIME_REFRESH_MS = 30 * 1000;
-const BAR_MAX_C = 30;
 
 let earliestDatePromise;
 
@@ -63,7 +62,6 @@ const state = {
 	rangeName: "day",
 	latest: null,
 	last24h: null,
-	yesterday: null,
 	history: null,
 	historyRequest: 0,
 };
@@ -132,25 +130,6 @@ function renderTemperatureUnits() {
 	show("#stat-min", summary?.min);
 	show("#stat-max", summary?.max);
 	show("#stat-average", summary?.average);
-	renderYesterday();
-}
-
-function renderYesterday() {
-	const section = $("#yesterday");
-	const summary = state.yesterday && summarise(state.yesterday);
-	section.hidden = !summary;
-	if (!summary) {
-		return;
-	}
-	const unit = UNITS[state.unit];
-	$("#yesterday-min").textContent = `${formatTemperature(summary.min, state.unit)} ${unit}`;
-	$("#yesterday-max").textContent = `${formatTemperature(summary.max, state.unit)} ${unit}`;
-	$("#yesterday-count").textContent = state.yesterday.length;
-	// Position the span of yesterday's range within a fixed 0-30°C scale.
-	const percent = (celsius) => Math.min(100, Math.max(0, (celsius / BAR_MAX_C) * 100));
-	const fill = $("#yesterday-fill");
-	fill.style.left = `${percent(summary.min)}%`;
-	fill.style.width = `${Math.max(2, percent(summary.max) - percent(summary.min))}%`;
 }
 
 function renderTrend() {
@@ -227,20 +206,6 @@ async function refreshLast24h() {
 	}
 }
 
-async function refreshYesterday() {
-	try {
-		const range = getYesterdayRange(await getEarliestDate());
-		if (!range) {
-			state.yesterday = null;
-		} else {
-			state.yesterday = (await fetchHistory(range.from, range.to)).readings;
-		}
-		renderYesterday();
-	} catch {
-		// Optional extra; leave whatever is currently shown.
-	}
-}
-
 /* History chart */
 function setOverlay(kind, message, retry = false) {
 	overlay.hidden = kind === null;
@@ -284,8 +249,19 @@ async function showHistory(rangeName, { quiet = false } = {}) {
 		historyStatus.textContent = "";
 		setOverlay("loading", "Loading history…");
 	}
-	const range = getRange(rangeName, await getEarliestDate());
+	const earliestDate = await getEarliestDate();
+	const range = rangeName === "yesterday"
+		? getYesterdayRange(earliestDate)
+		: getRange(rangeName, earliestDate);
 	if (requestId !== state.historyRequest) {
+		return;
+	}
+	if (!range) {
+		state.history = null;
+		clearChart(canvas);
+		canvas.setAttribute("aria-label", "No temperature history available for yesterday");
+		historyStatus.textContent = "";
+		setOverlay("empty", "No readings in this period.");
 		return;
 	}
 
@@ -325,7 +301,6 @@ renderTheme();
 renderTemperatureUnits();
 refreshLatest();
 refreshLast24h();
-refreshYesterday();
 showHistory(state.rangeName);
 
 setInterval(renderRelativeTime, RELATIVE_TIME_REFRESH_MS);
@@ -337,7 +312,6 @@ setInterval(() => {
 setInterval(() => {
 	if (!document.hidden) {
 		refreshLast24h();
-		refreshYesterday();
 		showHistory(state.rangeName, { quiet: true });
 	}
 }, HISTORY_REFRESH_MS);

@@ -38,5 +38,9 @@ export function getRange(rangeName, earliestDate = EARLIEST_HISTORY_DATE, now = 
 /** The previous whole UTC day as an inclusive date range, or null if it predates the earliest history. */
 export function getYesterdayRange(earliestDate = EARLIEST_HISTORY_DATE, now = new Date()) {
 	const date = toDateString(new Date(now.getTime() - DAY_MS));
-	return date < earliestDate ? null : { from: date, to: date };
+	if (date < earliestDate) {
+		return null;
+	}
+	const start = new Date(`${date}T00:00:00.000Z`);
+	return { from: date, to: date, start, end: new Date(start.getTime() + DAY_MS) };
 }

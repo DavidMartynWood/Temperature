@@ -53,7 +53,13 @@ describe("history ranges", () => {
 
   it("returns the previous UTC day for yesterday's range", () => {
     const now = new Date("2026-11-20T00:30:00.000Z");
-    expect(getYesterdayRange("2026-10-18", now)).toEqual({ from: "2026-11-19", to: "2026-11-19" });
+    const range = getYesterdayRange("2026-10-18", now);
+    expect(range).toMatchObject({
+      from: "2026-11-19",
+      to: "2026-11-19",
+      start: new Date("2026-11-19T00:00:00.000Z"),
+      end: new Date("2026-11-20T00:00:00.000Z"),
+    });
     expect(getYesterdayRange("2026-11-20", now)).toBeNull();
   });
 });

@@ -61,21 +61,12 @@
 				</div>
 			</section>
 
-			<section id="yesterday" class="card yesterday" aria-labelledby="yesterday-title" hidden>
-				<h2 id="yesterday-title" class="eyebrow">Yesterday's range</h2>
-				<p class="yesterday-values">
-					<span><span class="yesterday-label">Low</span> <strong id="yesterday-min">–</strong></span>
-					<span><span class="yesterday-label">High</span> <strong id="yesterday-max">–</strong></span>
-				</p>
-				<div class="range-bar" aria-hidden="true"><div id="yesterday-fill" class="range-bar-fill"></div></div>
-				<p class="stat-detail">Based on <span id="yesterday-count"></span> readings from midnight to midnight UTC.</p>
-			</section>
-
 			<section id="history" class="card" aria-labelledby="history-title">
 				<div class="history-header">
 					<h2 id="history-title">Temperature history</h2>
 					<div id="range-controls" class="segmented" role="group" aria-label="History range">
 						<button type="button" data-range="day" aria-pressed="true">24h</button>
+						<button type="button" data-range="yesterday" aria-pressed="false">Yesterday</button>
 						<button type="button" data-range="week" aria-pressed="false">7d</button>
 						<button type="button" data-range="month" aria-pressed="false">30d</button>
 						<button type="button" data-range="year" aria-pressed="false">1y</button>
