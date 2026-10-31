@@ -1,0 +1,110 @@
+name: Delete readings in date range
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start (inclusive), ISO 8601 UTC, e.g. 2026-10-01T00:00:00Z"
+        required: true
+      end:
+        description: "End (exclusive), ISO 8601 UTC, e.g. 2026-10-03T00:00:00Z"
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  START: ${{ inputs.start }}
+  END: ${{ inputs.end }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+defaults:
+  run:
+    working-directory: ./lake-temperature
+
+jobs:
+  preview:
+    name: Count rows to delete
+    runs-on: ubuntu-latest
+    outputs:
+      count: ${{ steps.count.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lake-temperature/package-lock.json
+
+      - run: npm ci
+
+      - name: Validate range
+        run: |
+          pattern='^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]+)?Z)?$'
+          for v in "$START" "$END"; do
+            [[ "$v" =~ $pattern ]] || { echo "::error::Invalid timestamp '$v'"; exit 1; }
+          done
+          node -e 'const [s,e]=[process.env.START,process.env.END].map(Date.parse); if(isNaN(s)||isNaN(e)||s>=e){console.error("Start must be before end");process.exit(1)}'
+
+      - name: Count matching readings
+        id: count
+        run: |
+          npx wrangler d1 execute lake-temperature-db --remote --json \
+            --command "WITH matching AS (SELECT id, received_at, temperature_c FROM readings WHERE received_at >= '$START' AND received_at < '$END') SELECT COUNT(*) AS n, (SELECT received_at FROM matching ORDER BY received_at ASC, id ASC LIMIT 1) AS first_received_at, (SELECT temperature_c FROM matching ORDER BY received_at ASC, id ASC LIMIT 1) AS first_temperature_c, (SELECT received_at FROM matching ORDER BY received_at DESC, id DESC LIMIT 1) AS last_received_at, (SELECT temperature_c FROM matching ORDER BY received_at DESC, id DESC LIMIT 1) AS last_temperature_c FROM matching" > count.json
+          node <<'NODE'
+          const fs = require("node:fs");
+          const result = JSON.parse(fs.readFileSync("count.json"))[0].results[0];
+          const values = {
+            count: result.n,
+            first_received_at: result.first_received_at ?? "none",
+            first_temperature_c: result.first_temperature_c ?? "none",
+            last_received_at: result.last_received_at ?? "none",
+            last_temperature_c: result.last_temperature_c ?? "none",
+          };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(values).map(([key, value]) => `${key}=${value}`).join("\n") + "\n");
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
+            "## Readings pending deletion",
+            `Range: \`${process.env.START}\` (inclusive) to \`${process.env.END}\` (exclusive)`,
+            "",
+            `**${values.count} rows** will be deleted from production once approved.`,
+            `First: \`${values.first_received_at}\` — ${values.first_temperature_c} °C`,
+            `Last: \`${values.last_received_at}\` — ${values.last_temperature_c} °C`,
+            "",
+          ].join("\n"));
+          NODE
+
+  delete:
+    name: Delete ${{ needs.preview.outputs.count }} rows (requires approval)
+    needs: preview
+    if: needs.preview.outputs.count != '0'
+    runs-on: ubuntu-latest
+    # Configure required reviewers on this environment (Settings > Environments).
+    environment: production-delete
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lake-temperature/package-lock.json
+
+      - run: npm ci
+
+      - name: Delete readings
+        env:
+          EXPECTED: ${{ needs.preview.outputs.count }}
+        run: |
+          # Abort if the row count changed since it was approved-for.
+          npx wrangler d1 execute lake-temperature-db --remote --json \
+            --command "SELECT COUNT(*) AS n FROM readings WHERE received_at >= '$START' AND received_at < '$END'" > recount.json
+          n=$(node -p 'JSON.parse(require("fs").readFileSync("recount.json"))[0].results[0].n')
+          if [ "$n" != "$EXPECTED" ]; then
+            echo "::error::Row count changed from $EXPECTED to $n since preview; aborting."
+            exit 1
+          fi
+          npx wrangler d1 execute lake-temperature-db --remote \
+            --command "DELETE FROM readings WHERE received_at >= '$START' AND received_at < '$END'"
+          echo "Deleted $n rows between \`$START\` and \`$END\`." >> "$GITHUB_STEP_SUMMARY"
