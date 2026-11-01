@@ -86,6 +86,20 @@ These come from the project's pull requests:
   - History starts from 18 October 2026, the first reading (#6).
   - PRs deploy a read-only preview Worker, a QA Worker holds a year of synthetic data, and bulk deletes go through an approval-gated workflow (#13, #27, #28, #31).
 
+### Temperature ranges
+
+The website labels the latest reading using these ranges (defined in `lake-temperature/public/js/insights.js`):
+
+| Range (°C) | Label | Comment |
+| --- | --- | --- |
+| Below 1 | 🧊 Ice | Get down here now, you'll remember this one! |
+| 1 to below 3 | 🥶 Shivers | Let the shivers commence |
+| 3 to below 5 | ❄ Cold | Bobble hat time |
+| 5 to below 10 | 🙂 Mild | Comfortable, but friends think you're nuts |
+| 10 to below 15 | ☀ Warm | Get a couple of loops in |
+| 15 to below 20 | 🥵 Hot | Bit warm, stay hydrated |
+| 20 and above | 🔥 Fire | Soup. Warrior-grade soup. Bring ice cubes |
+
 ## Repository layout
 
 | Path | Purpose |
