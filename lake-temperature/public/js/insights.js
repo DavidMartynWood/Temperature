@@ -2,10 +2,10 @@
 export const UNITS = { C: "°C", F: "°F" };
 
 const LABELS = [
-	{ below: 12, key: "cold", text: "Cold", symbol: "❄", hint: "Very chilly - a wetsuit is a good idea" },
-	{ below: 17, key: "cool", text: "Cool", symbol: "〰", hint: "Refreshing - brisk for most swimmers" },
-	{ below: 22, key: "comfortable", text: "Comfortable", symbol: "☺", hint: "Pleasant for a swim" },
-	{ below: Infinity, key: "warm", text: "Warm", symbol: "☀", hint: "Warm water - enjoy" },
+	{ below: 12, key: "cold", text: "Cold", symbol: "❄", hint: "Proper Ice Warrior weather - penguins are jealous" },
+	{ below: 17, key: "cool", text: "Cool", symbol: "〰", hint: "Lovely and fresh - almost too cosy for a warrior" },
+	{ below: 22, key: "comfortable", text: "Comfortable", symbol: "☺", hint: "Suspiciously warm - is someone running a bath?" },
+	{ below: Infinity, key: "warm", text: "Warm", symbol: "☀", hint: "Soup. Warrior-grade soup. Bring ice cubes" },
 ];
 
 export const TREND_THRESHOLD_C = 0.3;
