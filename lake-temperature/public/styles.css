@@ -121,7 +121,9 @@ h1, h2, h3, p {
 
 .brand img {
 	height: 3rem;
-	width: auto;
+	width: 3rem;
+	object-fit: cover;
+	border-radius: 50%;
 }
 
 .tagline {
