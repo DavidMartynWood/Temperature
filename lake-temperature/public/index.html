@@ -5,8 +5,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="theme-color" content="#eaf4f6" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
-		<meta name="description" content="Current lake water temperature with trend and history." />
-		<title>Lake temperature</title>
+		<meta name="description" content="Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers. It's never too cold." />
+		<title>Ice Warriors | Welton Waters water temperature</title>
+		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
@@ -14,7 +15,13 @@
 		<a class="skip-link" href="#current">Skip to current temperature</a>
 		<main>
 			<header class="page-header">
-				<h1>Lake temperature</h1>
+				<div class="brand">
+					<img src="/images/ice-warriors.png" alt="" width="56" height="50" />
+					<div>
+						<h1>Ice Warriors</h1>
+						<p class="tagline">Welton Waters · It's never too cold</p>
+					</div>
+				</div>
 				<div class="toolbar">
 					<div class="segmented" id="unit-controls" role="group" aria-label="Temperature unit">
 						<button type="button" data-unit="C" aria-pressed="true">°C</button>
