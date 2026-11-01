@@ -15,10 +15,18 @@ describe("insights", () => {
   });
 
   it("labels temperatures", () => {
-    expect(describeTemperature(5).text).toBe("Cold");
-    expect(describeTemperature(14).text).toBe("Cool");
-    expect(describeTemperature(20).text).toBe("Comfortable");
-    expect(describeTemperature(25).text).toBe("Warm");
+    expect(describeTemperature(0.5).text).toBe("Ice");
+    expect(describeTemperature(2)).toMatchObject({
+      key: "shivers",
+      text: "Shivers",
+      symbol: "🥶",
+      hint: "Let the shivers commence",
+    });
+    expect(describeTemperature(4).text).toBe("Cold");
+    expect(describeTemperature(8).text).toBe("Mild");
+    expect(describeTemperature(12).text).toBe("Warm");
+    expect(describeTemperature(18).text).toBe("Hot");
+    expect(describeTemperature(25).text).toBe("Fire");
   });
 
   it("summarises readings", () => {
