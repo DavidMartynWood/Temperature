@@ -113,6 +113,22 @@ h1, h2, h3, p {
 	flex-wrap: wrap;
 }
 
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.brand img {
+	height: 3rem;
+	width: auto;
+}
+
+.tagline {
+	font-size: 0.85rem;
+	opacity: 0.8;
+}
+
 h1 {
 	font-size: 1.25rem;
 	font-weight: 700;
