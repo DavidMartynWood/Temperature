@@ -208,7 +208,7 @@ h1 {
 }
 
 .badge[data-condition="ice"] { color: #064a75; border-style: double; border-width: 5px; }
-.badge[data-condition="excitement"] { color: #0a3f8c; border-style: double; border-width: 4px; }
+.badge[data-condition="shivers"] { color: #0a3f8c; border-style: double; border-width: 4px; }
 .badge[data-condition="cold"] { color: #0b5d6b; border-style: dashed; border-width: 4px; }
 .badge[data-condition="mild"] { color: #12602f; border-style: solid; }
 .badge[data-condition="warm"] { color: #6b5a00; border-style: dotted; border-width: 3px; }

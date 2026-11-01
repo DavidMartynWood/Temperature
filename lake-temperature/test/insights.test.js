@@ -16,7 +16,12 @@ describe("insights", () => {
 
   it("labels temperatures", () => {
     expect(describeTemperature(0.5).text).toBe("Ice");
-    expect(describeTemperature(2).text).toBe("Excitement");
+    expect(describeTemperature(2)).toMatchObject({
+      key: "shivers",
+      text: "Shivers",
+      symbol: "🥶",
+      hint: "Let the shivers commence",
+    });
     expect(describeTemperature(4).text).toBe("Cold");
     expect(describeTemperature(8).text).toBe("Mild");
     expect(describeTemperature(12).text).toBe("Warm");

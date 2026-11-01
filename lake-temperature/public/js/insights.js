@@ -3,7 +3,7 @@ export const UNITS = { C: "°C", F: "°F" };
 
 const LABELS = [
 	{ below: 1, key: "ice", text: "Ice", symbol: "🧊", hint: "Get down here now, you'll remember this one!" },
-	{ below: 3, key: "excitement", text: "Excitement", symbol: "🤩", hint: "Almost perfect" },
+	{ below: 3, key: "shivers", text: "Shivers", symbol: "🥶", hint: "Let the shivers commence" },
 	{ below: 5, key: "cold", text: "Cold", symbol: "❄", hint: "Bobble hat time" },
 	{ below: 10, key: "mild", text: "Mild", symbol: "🙂", hint: "Comfortable, but friends think you're nuts" },
 	{ below: 15, key: "warm", text: "Warm", symbol: "☀", hint: "Get a couple of loops in" },
