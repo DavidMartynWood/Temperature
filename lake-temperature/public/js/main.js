@@ -1,3 +1,5 @@
+import "./nav.js";
+import "./theme.js";
 import { fetchEarliestHistoryDate, fetchHistory, fetchLatestReading } from "./api.js";
 import { clearChart, drawChart } from "./chart.js";
 import { EARLIEST_HISTORY_DATE, STALE_READING_MS } from "./config.js";
@@ -38,7 +40,6 @@ const retryButton = $("#retry-history");
 const historyStatus = $("#history-status");
 const rangeButtons = document.querySelectorAll("[data-range]");
 const unitButtons = document.querySelectorAll("[data-unit]");
-const themeToggle = $("#theme-toggle");
 const root = document.documentElement;
 
 function readStorage(key) {
@@ -65,29 +66,6 @@ const state = {
 	history: null,
 	historyRequest: 0,
 };
-
-/* Theme */
-const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-function isDark() {
-	const chosen = root.dataset.theme;
-	return chosen ? chosen === "dark" : darkQuery.matches;
-}
-
-function renderTheme() {
-	const label = isDark() ? "Switch to light mode" : "Switch to dark mode";
-	themeToggle.setAttribute("aria-label", label);
-	themeToggle.title = label;
-	themeToggle.setAttribute("aria-pressed", String(isDark()));
-	redrawChart();
-}
-
-themeToggle.addEventListener("click", () => {
-	root.dataset.theme = isDark() ? "light" : "dark";
-	writeStorage("theme", root.dataset.theme);
-	renderTheme();
-});
-darkQuery.addEventListener("change", renderTheme);
 
 /* Latest reading */
 function isStale(reading) {
@@ -297,7 +275,7 @@ for (const button of rangeButtons) {
 }
 retryButton.addEventListener("click", () => showHistory(state.rangeName));
 
-renderTheme();
+document.addEventListener("themechange", redrawChart);
 renderTemperatureUnits();
 refreshLatest();
 refreshLast24h();

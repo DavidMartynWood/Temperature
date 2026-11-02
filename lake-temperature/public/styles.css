@@ -143,6 +143,161 @@ h1 {
 	gap: 0.5rem;
 }
 
+.header-tools {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-left: auto;
+	min-width: 0;
+}
+
+.toolbar .segmented {
+	width: auto;
+}
+
+a.brand {
+	color: inherit;
+	text-decoration: none;
+}
+
+.brand-name {
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.site-nav {
+	position: relative;
+}
+
+.nav-links {
+	display: none;
+	position: absolute;
+	z-index: 20;
+	right: 0;
+	top: calc(100% + 0.4rem);
+	min-width: 12.5rem;
+	max-width: calc(100vw - 2rem);
+	padding: 0.35rem;
+	border: 1px solid var(--border);
+	border-radius: 1rem;
+	background: var(--surface);
+	box-shadow: var(--shadow);
+}
+
+.site-nav.is-open .nav-links {
+	display: grid;
+}
+
+.nav-links a {
+	display: flex;
+	align-items: center;
+	min-height: 2.75rem;
+	padding: 0.35rem 0.85rem;
+	border-radius: 0.75rem;
+	color: var(--text);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.nav-links a:hover {
+	background: var(--surface-alt);
+}
+
+.nav-links a[aria-current="page"] {
+	color: var(--accent-contrast);
+	background: var(--accent);
+}
+
+.stack {
+	display: grid;
+	gap: 1rem;
+}
+
+.page-title {
+	font-size: clamp(1.75rem, 4vw, 2.25rem);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.15;
+}
+
+.lede {
+	max-width: 40rem;
+	font-size: 1.125rem;
+}
+
+.copy h2 {
+	font-size: 1.25rem;
+}
+
+.copy > * + * {
+	margin-top: 0.75rem;
+}
+
+.copy a {
+	color: var(--accent);
+	font-weight: 600;
+}
+
+dd,
+figcaption {
+	margin: 0;
+}
+
+.facts {
+	display: grid;
+	gap: 0.9rem;
+	margin: 0;
+}
+
+.facts div {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.facts dt {
+	color: var(--muted);
+	font-size: 0.85rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.person {
+	display: grid;
+	gap: 1rem;
+	align-items: center;
+}
+
+.person img {
+	width: min(100%, 16rem);
+	height: auto;
+	aspect-ratio: 1;
+	justify-self: start;
+	align-self: start;
+	object-fit: cover;
+	object-position: center 35%;
+	border-radius: calc(var(--radius) - 0.25rem);
+}
+
+.route {
+	margin: 0;
+}
+
+.route img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 0.75rem;
+}
+
+.route figcaption {
+	margin-top: 0.5rem;
+	color: var(--muted);
+	font-size: 0.95rem;
+}
+
 .card {
 	padding: 1.25rem;
 	border: 1px solid var(--border);
@@ -455,6 +610,38 @@ h1 {
 
 	.segmented button {
 		flex: 0 1 auto;
+	}
+
+	.nav-toggle {
+		display: none;
+	}
+
+	.site-nav {
+		position: static;
+	}
+
+	.nav-links,
+	.site-nav.is-open .nav-links {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		position: static;
+		min-width: 0;
+		max-width: none;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		gap: 0.15rem;
+	}
+
+	.person {
+		grid-template-columns: 12rem 1fr;
+	}
+
+	.person img {
+		width: 12rem;
+		height: 12rem;
 	}
 
 	#chart-container {
