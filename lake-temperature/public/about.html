@@ -10,6 +10,7 @@
 		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
@@ -40,7 +41,9 @@
 
 				<section class="card copy" aria-labelledby="where-title">
 					<h2 id="where-title">Where</h2>
-					<p>Welton Waters Adventure Centre.</p>
+					<p>Welton Waters Adventure Centre, Common Lane, Welton.</p>
+					<div id="where-map" class="where-map" role="region" aria-label="Map of Welton Waters Adventure Centre"></div>
+					<p><a href="https://www.google.com/maps/dir/?api=1&amp;destination=53.71495,-0.54882" target="_blank" rel="noopener noreferrer">Directions</a></p>
 				</section>
 
 				<section class="card copy" aria-labelledby="when-title">
@@ -88,5 +91,7 @@
 		</main>
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" defer></script>
+		<script src="/js/map.js" defer></script>
 	</body>
 </html>

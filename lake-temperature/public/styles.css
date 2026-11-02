@@ -240,6 +240,39 @@ a.brand {
 	font-weight: 600;
 }
 
+a.button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
+	padding: 0.4rem 1.1rem;
+	border-radius: 999px;
+	color: var(--accent-contrast);
+	background: var(--accent);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+a.button:hover {
+	filter: brightness(1.08);
+}
+
+.copy p:has(> a.button) {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.where-map {
+	height: 16rem;
+	border-radius: 0.75rem;
+	overflow: hidden;
+	z-index: 0;
+}
+
+.where-map a {
+	color: inherit;
+	font-weight: 400;
+}
+
 dd,
 figcaption {
 	margin: 0;
@@ -661,6 +694,10 @@ figcaption {
 
 	.person img.face-high {
 		object-position: center 28%;
+	}
+
+	.person img.face-mid {
+		object-position: center 50%;
 	}
 
 	#chart-container {
