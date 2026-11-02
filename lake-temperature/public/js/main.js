@@ -213,6 +213,9 @@ function formatRange(from, to) {
 	};
 	const start = format(from);
 	const end = format(to);
+	if (start === end) {
+		return start;
+	}
 	const startYear = String(from).slice(0, 4);
 	if (startYear === String(to).slice(0, 4) && start.endsWith(startYear)) {
 		return `${start.slice(0, -5)} to ${end}`;

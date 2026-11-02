@@ -1,23 +1,5 @@
 import { getHistory, getLatest, health, postReading } from "./handlers";
 
-const notFoundPage = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Page not found | Ice Warriors</title>
-<link rel="stylesheet" href="/styles.css" />
-</head>
-<body>
-<main>
-<h1 class="page-title">Page not found</h1>
-<p>That page isn't on the Ice Warriors site.</p>
-<p><a href="/">Back to the temperature</a></p>
-</main>
-</body>
-</html>
-`;
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -32,14 +14,19 @@ export default {
         return getLatest(env);
       case "GET /api/history":
         return getHistory(url, env);
-      default:
+      default: {
+        if (url.pathname === "/images/new-years-day-dip-2027.pdf") {
+          return Response.redirect(new URL("/events/new-years-day-dip-2027.pdf", url).toString(), 301);
+        }
         if (url.pathname.startsWith("/api/") || url.pathname === "/api") {
           return Response.json({ error: "Not found" }, { status: 404 });
         }
-        return new Response(notFoundPage, {
+        const page = await env.ASSETS.fetch(new URL("/404.html", url));
+        return new Response(page.body, {
           status: 404,
           headers: { "content-type": "text/html; charset=utf-8" },
         });
+      }
     }
   },
 } satisfies ExportedHandler<Env>;
