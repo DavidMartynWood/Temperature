@@ -264,21 +264,34 @@ figcaption {
 	text-transform: uppercase;
 }
 
-.person {
+.team-grid {
 	display: grid;
 	gap: 1rem;
-	align-items: center;
+}
+
+.person {
+	display: flow-root;
 }
 
 .person img {
-	width: min(100%, 16rem);
-	height: auto;
-	aspect-ratio: 1;
-	justify-self: start;
-	align-self: start;
+	float: left;
+	width: 9rem;
+	height: 9rem;
+	margin: 0 1rem 0.35rem 0;
 	object-fit: cover;
 	object-position: center 35%;
 	border-radius: calc(var(--radius) - 0.25rem);
+}
+
+.person img.face-high {
+	object-position: center 28%;
+}
+
+.person-role {
+	margin-top: 0.2rem;
+	color: var(--muted);
+	font-size: 0.95rem;
+	font-weight: 600;
 }
 
 .route {
@@ -635,13 +648,19 @@ figcaption {
 		gap: 0.15rem;
 	}
 
-	.person {
-		grid-template-columns: 12rem 1fr;
+	.team-grid {
+		grid-template-columns: 1fr 1fr;
 	}
 
 	.person img {
 		width: 12rem;
-		height: 12rem;
+		height: 8rem;
+		margin-top: -0.2rem;
+		object-position: center 78%;
+	}
+
+	.person img.face-high {
+		object-position: center 28%;
 	}
 
 	#chart-container {
