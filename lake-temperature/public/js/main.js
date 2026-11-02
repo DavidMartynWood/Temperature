@@ -197,6 +197,29 @@ function chartTheme() {
 	return { text: style.getPropertyValue("--muted").trim(), grid: style.getPropertyValue("--border").trim() };
 }
 
+function formatRange(from, to) {
+	const format = (iso) => {
+		const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso));
+		if (!match) {
+			return String(iso);
+		}
+		const [, year, month, day] = match;
+		return new Intl.DateTimeFormat("en-GB", {
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+			timeZone: "UTC",
+		}).format(new Date(Date.UTC(Number(year), Number(month) - 1, Number(day))));
+	};
+	const start = format(from);
+	const end = format(to);
+	const startYear = String(from).slice(0, 4);
+	if (startYear === String(to).slice(0, 4) && start.endsWith(startYear)) {
+		return `${start.slice(0, -5)} to ${end}`;
+	}
+	return `${start} to ${end}`;
+}
+
 function redrawChart() {
 	if (!state.history) {
 		return;
@@ -212,7 +235,7 @@ function redrawChart() {
 		return;
 	}
 	setOverlay(null);
-	historyStatus.textContent = `${count} plotted point${count === 1 ? "" : "s"} · ${range.from} to ${range.to}`;
+	historyStatus.textContent = `${count} plotted point${count === 1 ? "" : "s"} · ${formatRange(range.from, range.to)}`;
 }
 
 async function showHistory(rangeName, { quiet = false } = {}) {

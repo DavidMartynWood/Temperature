@@ -7,16 +7,22 @@
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
 		<meta name="description" content="Ice Warriors events. New Year's Day dip at Welton Waters on Friday 1 January 2027." />
 		<title>Events | Ice Warriors</title>
+		<link rel="canonical" href="https://icewarriors.org.uk/events" />
+		<meta property="og:title" content="Events | Ice Warriors" />
+		<meta property="og:description" content="Ice Warriors events. New Year's Day dip at Welton Waters on Friday 1 January 2027." />
+		<meta property="og:url" content="https://icewarriors.org.uk/events" />
+		<meta property="og:image" content="https://icewarriors.org.uk/images/og.jpg" />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
-		<main>
-			<header class="page-header">
+		<header class="page-header">
 				<a class="brand" href="/">
-					<img src="/images/ice-warriors.png" alt="" width="56" height="50" />
+					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
 					<div>
 						<p class="brand-name">Ice Warriors</p>
 						<p class="tagline">Welton Waters · It's never too cold</p>
@@ -30,8 +36,9 @@
 						</button>
 					</div>
 				</div>
-			</header>
+		</header>
 
+		<main>
 			<article id="content" class="stack" tabindex="-1">
 				<div class="copy">
 					<h1 class="page-title">Events</h1>
@@ -46,7 +53,7 @@
 						</div>
 						<div>
 							<dt>Where</dt>
-							<dd>Welton Waters</dd>
+							<dd><a href="https://www.google.com/maps/dir/?api=1&amp;destination=53.71495,-0.54882">Welton Waters</a></dd>
 						</div>
 						<div>
 							<dt>Time</dt>
@@ -73,16 +80,25 @@
 					<p><a class="button" href="/events/new-years-day-dip-2027.ics" download="new-years-day-dip-2027.ics">Add to calendar</a></p>
 
 					<figure class="route">
-						<img src="/images/nyd-2027-route.jpg" width="1024" height="768" alt="Map of the Welton Waters swim route: from the platform to buoy 1, across to buoy 2, then back to the finish. A dashed line shows the walk on land to go round again." />
+						<button type="button" class="route-open" aria-haspopup="dialog" aria-controls="route-dialog">
+							<img src="/images/nyd-2027-route.jpg" width="1024" height="768" alt="Map of the Welton Waters swim route: from the platform to buoy 1, across to buoy 2, then back to the finish. A dashed line shows the walk on land to go round again." />
+						</button>
 						<figcaption>Start at the platform, swim out to buoy 1, across to buoy 2, then back to the finish. The dashed line is the walk on land if you go round again.</figcaption>
 					</figure>
+					<dialog id="route-dialog" class="route-dialog" aria-label="Swim route, larger">
+						<form method="dialog">
+							<button type="submit" class="route-close">Close</button>
+						</form>
+						<img src="/images/nyd-2027-route.jpg" alt="" />
+					</dialog>
 
 					<p>You swim at your own risk.</p>
-					<p><a href="/images/new-years-day-dip-2027.pdf">New Year's Day dip poster (PDF)</a></p>
+					<p><a href="/events/new-years-day-dip-2027.pdf">New Year's Day dip poster (PDF, 572 KB)</a></p>
 				</section>
 			</article>
+		</main>
 
-			<footer id="social-links">
+		<footer id="social-links">
 				<p>
 					<a href="https://www.facebook.com/groups/team.ice.warriors/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
 						<svg aria-hidden="true" viewBox="0 0 24 24">
@@ -106,9 +122,9 @@
 						</svg>
 					</a>
 				</p>
-			</footer>
-		</main>
+		</footer>
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
+		<script type="module" src="/js/route.js"></script>
 	</body>
 </html>

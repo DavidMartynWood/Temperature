@@ -46,6 +46,11 @@ if (nav) {
 		menu.append(link);
 	}
 
+	const tools = nav.parentElement?.querySelector(":scope > .toolbar");
+	if (tools) {
+		menu.append(tools);
+	}
+
 	function setOpen(open) {
 		nav.classList.toggle("is-open", open);
 		toggle.setAttribute("aria-expanded", String(open));
@@ -72,6 +77,15 @@ if (nav) {
 		if (event.key === "Escape" && nav.classList.contains("is-open")) {
 			setOpen(false);
 			toggle.focus();
+		}
+	});
+
+	nav.addEventListener("focusout", (event) => {
+		if (!nav.classList.contains("is-open")) {
+			return;
+		}
+		if (!(event.relatedTarget instanceof Node) || !nav.contains(event.relatedTarget)) {
+			setOpen(false);
 		}
 	});
 

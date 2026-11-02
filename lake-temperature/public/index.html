@@ -7,16 +7,22 @@
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
 		<meta name="description" content="Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers. It's never too cold." />
 		<title>Ice Warriors | Welton Waters water temperature</title>
+		<link rel="canonical" href="https://icewarriors.org.uk/" />
+		<meta property="og:title" content="Ice Warriors | Welton Waters water temperature" />
+		<meta property="og:description" content="Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers. It's never too cold." />
+		<meta property="og:url" content="https://icewarriors.org.uk/" />
+		<meta property="og:image" content="https://icewarriors.org.uk/images/og.jpg" />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#current">Skip to current temperature</a>
-		<main>
-			<header class="page-header">
+		<header class="page-header">
 				<div class="brand">
-					<img src="/images/ice-warriors.png" alt="" width="56" height="50" />
+					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
 					<div>
 						<h1>Ice Warriors</h1>
 						<p class="tagline">Welton Waters · It's never too cold</p>
@@ -34,8 +40,9 @@
 						</button>
 					</div>
 				</div>
-			</header>
+		</header>
 
+		<main>
 			<section id="current" class="card hero" aria-labelledby="current-title" tabindex="-1">
 				<h2 id="current-title" class="eyebrow">Current water temperature</h2>
 				<p id="temperature" class="hero-temperature" aria-live="polite" aria-atomic="true"><span class="loading-text">Loading…</span></p>
@@ -93,7 +100,9 @@
 				<p id="history-status" aria-live="polite"></p>
 				<p class="note">History available from 18 October 2026.</p>
 			</section>
-			<footer id="social-links">
+		</main>
+
+		<footer id="social-links">
 				<p>
 					<a href="https://www.facebook.com/groups/team.ice.warriors/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
 						<svg aria-hidden="true" viewBox="0 0 24 24">
@@ -117,8 +126,7 @@
 						</svg>
 					</a>
 				</p>
-			</footer>
-		</main>
+		</footer>
 		<script src="/vendor/chart.umd.js" defer></script>
 		<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js" defer></script>
 		<script type="module" src="/js/main.js"></script>

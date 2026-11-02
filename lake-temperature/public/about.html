@@ -7,17 +7,23 @@
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
 		<meta name="description" content="Ice Warriors swim together at Welton Waters on Wednesday evenings from May through to September." />
 		<title>About | Ice Warriors</title>
+		<link rel="canonical" href="https://icewarriors.org.uk/about" />
+		<meta property="og:title" content="About | Ice Warriors" />
+		<meta property="og:description" content="Ice Warriors swim together at Welton Waters on Wednesday evenings from May through to September." />
+		<meta property="og:url" content="https://icewarriors.org.uk/about" />
+		<meta property="og:image" content="https://icewarriors.org.uk/images/og.jpg" />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+		<link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
-		<main>
-			<header class="page-header">
+		<header class="page-header">
 				<a class="brand" href="/">
-					<img src="/images/ice-warriors.png" alt="" width="56" height="50" />
+					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
 					<div>
 						<p class="brand-name">Ice Warriors</p>
 						<p class="tagline">Welton Waters · It's never too cold</p>
@@ -31,8 +37,9 @@
 						</button>
 					</div>
 				</div>
-			</header>
+		</header>
 
+		<main>
 			<article id="content" class="stack" tabindex="-1">
 				<div class="copy">
 					<h1 class="page-title">About</h1>
@@ -53,8 +60,7 @@
 
 				<section class="card copy" aria-labelledby="come-title">
 					<h2 id="come-title">Come along</h2>
-					<p>Fill in the online form, then just turn up with your equipment and a £5 note.</p>
-					<!-- The Welton form link goes on "online form" when the new form is ready. -->
+					<p>Fill in the <a href="https://docs.google.com/forms/d/e/1FAIpQLScJNQB42FXZXFIc-R181u2iMjorC9L8X3Ve_6sZB5Cf1tvQCA/viewform" target="_blank" rel="noopener noreferrer">online form</a>, then just turn up with your equipment and a £5 note.</p>
 				</section>
 
 				<section class="card copy" aria-labelledby="safety-title">
@@ -62,8 +68,9 @@
 					<p>Please ensure you have a bright coloured swim cap and tow float. These can be purchased from us if you need one. We have an incredible team of volunteers on and off the water who are there to help you.</p>
 				</section>
 			</article>
+		</main>
 
-			<footer id="social-links">
+		<footer id="social-links">
 				<p>
 					<a href="https://www.facebook.com/groups/team.ice.warriors/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
 						<svg aria-hidden="true" viewBox="0 0 24 24">
@@ -87,11 +94,10 @@
 						</svg>
 					</a>
 				</p>
-			</footer>
-		</main>
+		</footer>
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" defer></script>
+		<script src="/vendor/leaflet/leaflet.js" defer></script>
 		<script src="/js/map.js" defer></script>
 	</body>
 </html>
