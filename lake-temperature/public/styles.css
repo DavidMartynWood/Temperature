@@ -355,6 +355,10 @@ figcaption {
 	object-position: center 28%;
 }
 
+.person img.face-gaye {
+	object-position: center center;
+}
+
 .person-role {
 	margin-top: 0.2rem;
 	color: var(--muted);
@@ -763,6 +767,12 @@ figcaption {
 
 	.person img.face-high {
 		object-position: center 28%;
+	}
+
+	.person img.face-gaye {
+		width: 9rem;
+		height: 9rem;
+		object-position: center center;
 	}
 
 	#chart-container {
