@@ -765,10 +765,6 @@ figcaption {
 		object-position: center 28%;
 	}
 
-	.person img.face-mid {
-		object-position: center 50%;
-	}
-
 	#chart-container {
 		height: 22rem;
 	}
