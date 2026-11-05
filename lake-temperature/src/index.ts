@@ -14,6 +14,8 @@ export default {
         return getLatest(env);
       case "GET /api/history":
         return getHistory(url, env);
+      case "GET /":
+        return renderHome(request, env);
       default: {
         if (url.pathname === "/images/new-years-day-dip-2027.pdf") {
           return Response.redirect(new URL("/events/new-years-day-dip-2027.pdf", url).toString(), 301);
@@ -36,3 +38,22 @@ export default {
     }
   },
 } satisfies ExportedHandler<Env>;
+
+/** Pre-renders the latest temperature so crawlers and non-JS clients don't see "Loading…". */
+async function renderHome(request: Request, env: Env): Promise<Response> {
+  const page = await env.ASSETS.fetch(request);
+  try {
+    const latest = (await (await getLatest(env)).json()) as { reading: { temperature_c: number } | null };
+    if (!page.ok || !latest.reading) return page;
+    const celsius = latest.reading.temperature_c.toFixed(1);
+    return new HTMLRewriter()
+      .on("#temperature", {
+        element(element) {
+          element.setInnerContent(`${celsius}<span class="unit">°C</span>`, { html: true });
+        },
+      })
+      .transform(page);
+  } catch {
+    return page;
+  }
+}
