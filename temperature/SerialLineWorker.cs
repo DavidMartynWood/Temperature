@@ -14,6 +14,7 @@ public sealed class SerialLineWorker : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly Meter _meter;
     private readonly Counter<long> _rxErrorCounter;
+    private readonly Counter<long> _nullTemperatureCounter;
     private readonly Gauge<double> _temperatureGauge;
     private readonly Gauge<int> _batteryGauge;
     private readonly Gauge<int> _rssiGauge;
@@ -30,6 +31,7 @@ public sealed class SerialLineWorker : BackgroundService
         _configuration = configuration;
         _meter = meterFactory.Create(MeterName);
         _rxErrorCounter = _meter.CreateCounter<long>("radio_rx_errors");
+        _nullTemperatureCounter = _meter.CreateCounter<long>("temperature_null_readings");
         _temperatureGauge = _meter.CreateGauge<double>("temperature", unit: "°C");
         _batteryGauge = _meter.CreateGauge<int>("battery", unit: "%");
         _rssiGauge = _meter.CreateGauge<int>("rssi", unit: "dBm");
@@ -108,6 +110,7 @@ public sealed class SerialLineWorker : BackgroundService
 
                         if (message.Payload.Temperature is not double temperature)
                         {
+                            _nullTemperatureCounter.Add(1);
                             _logger.LogError("Ignoring JSON line without a temperature value");
                             continue;
                         }

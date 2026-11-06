@@ -76,7 +76,7 @@ These come from the project's pull requests:
 - **Receiver does the decoding and emits JSON lines**: the .NET forwarder stays free of radio details. Decimal formatting is done manually to avoid depending on floating-point `printf`.
 - **Long range over speed**: SF12 and coding rate 4/8 trade airtime for distance. TX power was lowered from 22 to 14 dBm to stay within legal limits on 868 MHz.
 - **Low-power transmitter**: a software timer wakes the loop every 30 minutes and the radio is put to sleep after each send. The first ADC battery reading is discarded because it is unreliable.
-- **Observable reliability**: the forwarder counts `OnRxError` lines in a `radio_rx_errors` metric (#2), and applies a Polly retry per endpoint with failures isolated between the local and Cloudflare destinations (#10).
+- **Observable reliability**: the forwarder counts `OnRxError` lines in a `radio_rx_errors` metric (#2), counts null temperature readings (a sensor fault) in a `temperature_null_readings` metric, and applies a Polly retry per endpoint with failures isolated between the local and Cloudflare destinations (#10).
 - **Configuration through environment variables** (#16): serial port and endpoints keep their defaults but can be overridden.
 - **Website and Worker**:
   - API input is validated, the Worker is split into router, handlers, validation and config modules, and tests and type-checking run in CI (#9, #16).
