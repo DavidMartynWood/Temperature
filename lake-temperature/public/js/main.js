@@ -319,6 +319,7 @@ function loadInitialData() {
 loadInitialData();
 renderTemperatureUnits();
 renderTrend();
+delete root.dataset.unitPending;
 refreshLatest();
 refreshLast24h();
 showHistory(state.rangeName);

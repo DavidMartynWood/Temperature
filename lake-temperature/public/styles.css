@@ -819,3 +819,15 @@ figcaption {
 		transition-duration: 0.001ms !important;
 	}
 }
+
+/* Hide server-rendered °C values until main.js has switched them to °F; reveal anyway if it never runs. */
+[data-unit-pending] :is(#temperature, .stat-value) {
+	animation: reveal-after-delay 0s 1.5s forwards;
+	visibility: hidden;
+}
+
+@keyframes reveal-after-delay {
+	to {
+		visibility: visible;
+	}
+}
