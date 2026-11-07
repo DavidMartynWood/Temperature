@@ -10,7 +10,7 @@ const LABELS = [
 	{ below: 15, key: "warm", text: "Warm", symbol: "☀️", hint: "Get a couple of loops in" },
 	{ below: 20, key: "hot", text: "Hot", symbol: "🥵", hint: "Bit warm, stay hydrated" },
 	{ below: 22, key: "fire", text: "Fire", symbol: "🔥", hint: "Soup. Warrior-grade soup. Bring ice cubes" },
-	{ below: Infinity, key: "lava", text: "Lava", symbol: "🥵", hint: "The lake is lava!" },
+	{ below: Infinity, key: "volcanic", text: "Volcanic", symbol: "🌋", hint: "The lake is lava." },
 ];
 
 export const TREND_THRESHOLD_C = 0.3;

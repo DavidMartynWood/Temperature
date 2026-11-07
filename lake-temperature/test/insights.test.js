@@ -29,7 +29,7 @@ describe("insights", () => {
     expect(describeTemperature(12).text).toBe("Warm");
     expect(describeTemperature(18).text).toBe("Hot");
     expect(describeTemperature(21).text).toBe("Fire");
-    expect(describeTemperature(22).text).toBe("Lava");
+    expect(describeTemperature(22).text).toBe("Volcanic");
   });
 
   it("summarises readings", () => {

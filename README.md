@@ -100,7 +100,7 @@ The website labels the latest reading using these ranges (defined in `lake-tempe
 | 10 to below 15 | ☀️ Warm | Get a couple of loops in |
 | 15 to below 20 | 🥵 Hot | Bit warm, stay hydrated |
 | 20 to below 22 | 🔥 Fire | Soup. Warrior-grade soup. Bring ice cubes |
-| 22 and above | 🥵 Lava | The lake is lava! |
+| 22 and above | 🌋 Volcanic | The lake is lava. |
 
 ## Repository layout
 
