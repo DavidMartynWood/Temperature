@@ -23,10 +23,13 @@ describe("insights", () => {
       hint: "Let the shivers commence",
     });
     expect(describeTemperature(4).text).toBe("Cold");
+    expect(describeTemperature(7.9).text).toBe("Gloves");
     expect(describeTemperature(8).text).toBe("Mild");
+    expect(describeTemperature(9.9).text).toBe("Mild");
     expect(describeTemperature(12).text).toBe("Warm");
     expect(describeTemperature(18).text).toBe("Hot");
-    expect(describeTemperature(25).text).toBe("Fire");
+    expect(describeTemperature(21).text).toBe("Fire");
+    expect(describeTemperature(22).text).toBe("Lava");
   });
 
   it("summarises readings", () => {

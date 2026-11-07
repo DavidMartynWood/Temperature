@@ -4,11 +4,13 @@ export const UNITS = { C: "°C", F: "°F" };
 const LABELS = [
 	{ below: 1, key: "ice", text: "Ice", symbol: "🧊", hint: "Get down here now, you'll remember this one!" },
 	{ below: 3, key: "shivers", text: "Shivers", symbol: "🥶", hint: "Let the shivers commence" },
-	{ below: 5, key: "cold", text: "Cold", symbol: "❄", hint: "Bobble hat time" },
+	{ below: 5, key: "cold", text: "Cold", symbol: "❄️", hint: "Bobble hat time" },
+	{ below: 8, key: "gloves", text: "Gloves", symbol: "🧤", hint: "Gloves on, your hands will thank you" },
 	{ below: 10, key: "mild", text: "Mild", symbol: "🙂", hint: "Comfortable, but friends think you're nuts" },
-	{ below: 15, key: "warm", text: "Warm", symbol: "☀", hint: "Get a couple of loops in" },
+	{ below: 15, key: "warm", text: "Warm", symbol: "☀️", hint: "Get a couple of loops in" },
 	{ below: 20, key: "hot", text: "Hot", symbol: "🥵", hint: "Bit warm, stay hydrated" },
-	{ below: Infinity, key: "fire", text: "Fire", symbol: "🔥", hint: "Soup. Warrior-grade soup. Bring ice cubes" },
+	{ below: 22, key: "fire", text: "Fire", symbol: "🔥", hint: "Soup. Warrior-grade soup. Bring ice cubes" },
+	{ below: Infinity, key: "lava", text: "Lava", symbol: "🥵", hint: "The lake is lava!" },
 ];
 
 export const TREND_THRESHOLD_C = 0.3;
