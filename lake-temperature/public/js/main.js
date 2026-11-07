@@ -302,7 +302,24 @@ for (const button of rangeButtons) {
 retryButton.addEventListener("click", () => showHistory(state.rangeName));
 
 document.addEventListener("themechange", redrawChart);
+function loadInitialData() {
+	try {
+		const data = JSON.parse($("#initial-data")?.textContent ?? "null");
+		if (data?.reading) {
+			showLatest(data.reading);
+		}
+		if (data?.last24h) {
+			state.last24h = data.last24h;
+		}
+	} catch {
+		// Fall back to fetching below.
+	}
+}
+
+loadInitialData();
 renderTemperatureUnits();
+renderTrend();
+delete root.dataset.unitPending;
 refreshLatest();
 refreshLast24h();
 showHistory(state.rangeName);
