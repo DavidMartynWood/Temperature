@@ -55,7 +55,8 @@ interface Last24h {
  * and first paint don't see placeholders. The same data is embedded for main.js to reuse.
  */
 async function renderHome(request: Request, env: Env): Promise<Response> {
-  // Drop conditional headers so the asset layer can't answer 304 and make the browser reuse a stale pre-rendered copy.
+  // The page is rendered with live data, but the asset validators only describe its static template.
+  // A 304 could make the browser reuse an older rendered page, so bypass those validators and don't cache the result.
   const headers = new Headers(request.headers);
   headers.delete("If-None-Match");
   headers.delete("If-Modified-Since");
