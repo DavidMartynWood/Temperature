@@ -1,0 +1,15 @@
+{
+	"partners": [
+		{
+			"id": "zone3",
+			"name": "Zone3",
+			"logo": "/images/zone3-wordmark.svg",
+			"offer": "15% off full-priced items",
+			"code": "ICEWARRIORS",
+			"link": "https://zone3.com/discount/ICEWARRIORS?dt_id=3686857&utm_source=clubs&utm_campaign=ICEWARRIORS",
+			"earnsCommission": true,
+			"visibility": "public",
+			"order": 1
+		}
+	]
+}
