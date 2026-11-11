@@ -1,5 +1,6 @@
 import { describeTemperature, formatRelativeTime, formatTemperature, getTrend, summarise } from "../public/js/insights.js";
 import { getHistory, getLatest, health, postReading } from "./handlers";
+import { uncoverPartners } from "./partners";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -15,6 +16,8 @@ export default {
         return getLatest(env);
       case "GET /api/history":
         return getHistory(url, env);
+      case "POST /api/partners/uncover":
+        return uncoverPartners(request, env);
       case "GET /":
         return renderHome(request, env);
       default: {

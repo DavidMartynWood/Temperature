@@ -3,6 +3,7 @@ const pages = [
 	{ href: "/about", label: "About" },
 	{ href: "/team", label: "Meet the team" },
 	{ href: "/events", label: "Events" },
+	{ href: "/partners", label: "Partners" },
 ];
 
 function currentPath() {

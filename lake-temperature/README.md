@@ -11,7 +11,9 @@ Cloudflare Worker (API + D1 database) and static website showing the current and
 | `src/validation.ts` | Input validation helpers |
 | `src/config.ts` | Constants (earliest history date, limits) |
 | `public/index.html`, `public/styles.css` | Page markup and styles |
-| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring) |
+| `public/partners.html`, `public/js/partners.js`, `public/data/partners.json` | Partners page: public offers from JSON; members codes via uncover API |
+| `src/partners.ts` | `POST /api/partners/uncover` (passphrase gate; stub `CODE` until Cloudflare secrets) |
+| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring), `partners.js`, `nav.js` |
 | `public/vendor/` | Vendored browser bundles for Chart.js and its date adapter; loaded as globals, no build step |
 | `migrations/` | D1 schema migrations |
 
@@ -45,6 +47,7 @@ To update them, obtain the browser bundle from the corresponding upstream packag
 - `GET /api/latest` - latest reading or `null`
 - `GET /api/history?from=YYYY-MM-DD&to=YYYY-MM-DD` (inclusive UTC dates) or `?hours=N`. Ranges of a year or more return daily min/max (`aggregation: "daily-extremes"`). Responses also include `startingReading`, the latest reading before the requested period, to anchor the chart.
 - `POST /api/readings` - body `{"timestamp": "<ISO 8601 UTC, ends in Z>", "temperature_c": <number>}`, requires an `Authorization` header of the form "Bearer" followed by the `INGEST_TOKEN` secret.
+- `POST /api/partners/uncover` - body `{"passphrase": "<string>"}`. On success returns `{ "partners": { "<id>": { "code": "...", "link": "..." } } }` for members-only fields. Until Cloudflare secrets are set, the Worker falls back to passphrase `CODE` and hidden payload `{ "stub": { "code": "CODE" } }`. Set `PARTNERS_PASSPHRASE` and `PARTNERS_HIDDEN` (JSON string) to replace the stub; rate-limited to five failed attempts per IP per 15 minutes.
 
 ## Development
 
