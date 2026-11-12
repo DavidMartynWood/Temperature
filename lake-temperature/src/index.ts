@@ -58,14 +58,19 @@ interface Last24h {
  * and first paint don't see placeholders. The same data is embedded for main.js to reuse.
  */
 async function renderHome(request: Request, env: Env): Promise<Response> {
-  const page = await env.ASSETS.fetch(request);
+  // The page is rendered with live data, but the asset validators only describe its static template.
+  // A 304 could make the browser reuse an older rendered page, so bypass those validators and don't cache the result.
+  const headers = new Headers(request.headers);
+  headers.delete("If-None-Match");
+  headers.delete("If-Modified-Since");
+  const page = await env.ASSETS.fetch(new Request(request, { headers }));
   try {
     const [latestResponse, historyResponse] = await Promise.all([
       getLatest(env),
       getHistory(new URL("/api/history?hours=24", request.url), env),
     ]);
     const { reading } = (await latestResponse.json()) as { reading: Reading | null };
-    if (!page.ok || !reading) return page;
+    if (!page.ok || !reading) return noStore(page);
     const last24h = historyResponse.ok ? ((await historyResponse.json()) as Last24h) : null;
 
     const label = describeTemperature(reading.temperature_c)!;
@@ -120,10 +125,18 @@ async function renderHome(request: Request, env: Env): Promise<Response> {
           element.append(`<script type="application/json" id="initial-data">${bootstrap}</script>`, { html: true });
         },
       })
-      .transform(page);
+      .transform(noStore(page));
   } catch {
-    return page;
+    return noStore(page);
   }
+}
+
+function noStore(page: Response): Response {
+  const response = new Response(page.body, page);
+  response.headers.set("Cache-Control", "no-store");
+  response.headers.delete("ETag");
+  response.headers.delete("Last-Modified");
+  return response;
 }
 
 const TREND_TEXT: Record<string, string> = {
