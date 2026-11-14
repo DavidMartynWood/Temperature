@@ -63,6 +63,14 @@
 					</div>
 					<p id="install-manual">On Android, open your browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>. On desktop Chrome or Edge, use the install icon in the address bar. On iPhone or iPad, open this page in Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</p>
 				</section>
+
+				<section id="reminders" class="card copy" aria-labelledby="reminders-title" hidden>
+					<h2 id="reminders-title">Event reminders</h2>
+					<p>Get a notification with the current water temperature. Wednesday reminders run from May to September.</p>
+					<p><label><input type="checkbox" id="reminder-saturday" disabled /> Saturdays at 8am</label></p>
+					<p><label><input type="checkbox" id="reminder-wednesday" disabled /> Wednesdays at 4pm</label></p>
+					<p id="reminders-status" role="status"></p>
+				</section>
 			</article>
 		</main>
 
@@ -94,5 +102,6 @@
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
 		<script type="module" src="/js/install.js"></script>
+		<script type="module" src="/js/reminders.js"></script>
 	</body>
 </html>

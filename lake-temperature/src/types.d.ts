@@ -9,6 +9,12 @@ interface Env {
   PARTNERS_PASSPHRASE?: string;
   /** JSON map of partner id → hidden fields. Falls back to stub when unset. */
   PARTNERS_HIDDEN?: string;
+  /** Web Push (VAPID) public key, base64url. Generate with scripts/generate-vapid-keys.mjs. */
+  VAPID_PUBLIC_KEY?: string;
+  /** Web Push (VAPID) private key as a JWK JSON string. */
+  VAPID_PRIVATE_KEY?: string;
+  /** Contact for push services, a mailto: or https: URL. */
+  VAPID_SUBJECT?: string;
 }
 
 interface ReadingRequest {
