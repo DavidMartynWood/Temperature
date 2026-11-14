@@ -6,6 +6,8 @@ const pages = [
 	{ href: "/partners", label: "Partners" },
 	{ href: "/install", label: "Install app" },
 ];
+const isStandalone =
+	window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
 function currentPath() {
 	let path = window.location.pathname;
@@ -39,6 +41,9 @@ if (nav) {
 	menu.className = "nav-links";
 
 	for (const page of pages) {
+		if (isStandalone && page.href === "/install") {
+			continue;
+		}
 		const link = document.createElement("a");
 		link.href = page.href;
 		link.textContent = page.label;
