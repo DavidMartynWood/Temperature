@@ -1,6 +1,7 @@
 import { describeTemperature, formatRelativeTime, formatTemperature, getTrend, summarise } from "../public/js/insights.js";
 import { getHistory, getLatest, health, postReading } from "./handlers";
 import { uncoverPartners } from "./partners";
+import { getPushKey, reminderDue, sendReminders, subscribe, unsubscribe } from "./push";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -18,6 +19,12 @@ export default {
         return getHistory(url, env);
       case "POST /api/partners/uncover":
         return uncoverPartners(request, env);
+      case "GET /api/push/key":
+        return getPushKey(env);
+      case "POST /api/push/subscribe":
+        return subscribe(request, env);
+      case "POST /api/push/unsubscribe":
+        return unsubscribe(request, env);
       case "GET /":
         return renderHome(request, env);
       default: {
@@ -39,6 +46,13 @@ export default {
           headers: { "content-type": "text/html; charset=utf-8" },
         });
       }
+    }
+  },
+
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    const reminder = reminderDue(new Date(controller.scheduledTime));
+    if (reminder) {
+      ctx.waitUntil(sendReminders(env, reminder, controller.scheduledTime));
     }
   },
 } satisfies ExportedHandler<Env>;

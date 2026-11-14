@@ -15,6 +15,7 @@ Cloudflare Worker (API + D1 database) and static website showing the current and
 | `src/partners.ts` | `POST /api/partners/uncover` (passphrase gate; stub `CODE` until Cloudflare secrets) |
 | `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring), `partners.js`, `nav.js` |
 | `public/vendor/` | Vendored browser bundles for Chart.js and its date adapter; loaded as globals, no build step |
+| `src/push.ts`, `public/sw.js`, `public/js/reminders.js` | Event reminder push notifications (see below) |
 | `migrations/` | D1 schema migrations |
 
 The earliest history date is present in the Worker, browser configuration, and the page's availability note. The test suite checks these values remain in sync.
@@ -48,6 +49,19 @@ To update them, obtain the browser bundle from the corresponding upstream packag
 - `GET /api/history?from=YYYY-MM-DD&to=YYYY-MM-DD` (inclusive UTC dates) or `?hours=N`. Ranges of a year or more return daily min/max (`aggregation: "daily-extremes"`). Responses also include `startingReading`, the latest reading before the requested period, to anchor the chart.
 - `POST /api/readings` - body `{"timestamp": "<ISO 8601 UTC, ends in Z>", "temperature_c": <number>}`, requires an `Authorization` header of the form "Bearer" followed by the `INGEST_TOKEN` secret.
 - `POST /api/partners/uncover` - body `{"passphrase": "<string>"}`. On success returns `{ "partners": { "<id>": { "code": "...", "link": "..." } } }` for members-only fields. Until Cloudflare secrets are set, the Worker falls back to passphrase `CODE` and hidden payload `{ "stub": { "code": "CODE" } }`. Set `PARTNERS_PASSPHRASE` and `PARTNERS_HIDDEN` (JSON string) to replace the stub; rate-limited to five failed attempts per IP per 15 minutes.
+- `GET /api/push/key` - VAPID public key, or 503 when notifications aren't configured.
+- `POST /api/push/subscribe` - body `{"endpoint": "<push endpoint>", "saturday": <boolean>, "wednesday": <boolean>}`; stores the subscription (or removes it when both are false). `POST /api/push/unsubscribe` takes `{"endpoint"}`. Only known browser push services are accepted.
+
+## Event reminders
+
+On the Install page, users can opt in to a Saturday 8am ("Join us for a dip this morning?") and a Wednesday 4pm ("Join us for a swim this evening?") notification, each followed by "Water temperature is X °C". They run May to September only.
+
+- Cron triggers in `wrangler.jsonc` fire at 07:00 UTC Saturdays and 15:00 UTC Wednesdays, May to September (always BST, so 08:00 and 16:00 UK time); `reminderDue` re-checks UK time.
+- Nothing is sent if the latest reading is more than an hour old.
+- Pushes carry no payload, so no encryption is needed: `public/sw.js` fetches `/api/latest` and builds the text.
+- Setup: run `node scripts/generate-vapid-keys.mjs`, then store the output with `npx wrangler secret put VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (optionally `VAPID_SUBJECT`, a `mailto:` URL). Without them the option is hidden. On iPhone/iPad the app must be added to the home screen first.
+- Delivery practices: permission is only requested when a user ticks a box; every push always shows a notification (with a 4s limit on the temperature fetch), at most two a week, with a 1 hour TTL so stale reminders are dropped; rotated subscriptions (`pushsubscriptionchange`) keep their choices.
+- Expired subscriptions (404/410 from the push service) are deleted automatically.
 
 ## Development
 
