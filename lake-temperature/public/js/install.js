@@ -47,9 +47,11 @@ function removePrompt() {
 }
 
 function showPrompt() {
+	const current = document.querySelector("#current");
 	if (
 		onInstallPage ||
 		!deferred ||
+		!current ||
 		visits < MIN_VISITS ||
 		dismissedRecently() ||
 		document.querySelector("#install-prompt")
@@ -74,7 +76,7 @@ function showPrompt() {
 		removePrompt();
 	});
 	bar.append(install, " · ", dismiss);
-	document.querySelector("footer")?.before(bar);
+	current.before(bar);
 }
 
 async function promptInstall() {
