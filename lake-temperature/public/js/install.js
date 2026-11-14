@@ -21,6 +21,7 @@ const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "
 const isIos =
 	/iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
 	(window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
+const inAppBrowser = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(window.navigator.userAgent);
 let deferred = null;
 
 const visits = Number(read("pwaVisits") || 0) + 1;
@@ -39,9 +40,12 @@ function show(selector, visible) {
 }
 
 function renderInstallPage() {
-	show("#install-ready", deferred !== null);
-	show("#install-ios", isIos);
-	show("#install-manual", deferred === null && !isIos);
+	show("#install-inapp", inAppBrowser);
+	show("#install-inapp-ios", inAppBrowser && isIos);
+	show("#install-inapp-android", inAppBrowser && !isIos);
+	show("#install-ready", !inAppBrowser && deferred !== null);
+	show("#install-ios", !inAppBrowser && isIos);
+	show("#install-manual", !inAppBrowser && deferred === null && !isIos);
 }
 
 function removePrompt() {
@@ -52,9 +56,9 @@ function showPrompt() {
 	const current = document.querySelector("#current");
 	if (
 		onInstallPage ||
-		!deferred ||
+		(!deferred && !inAppBrowser) ||
 		!current ||
-		visits < MIN_VISITS ||
+		(visits < MIN_VISITS && !inAppBrowser) ||
 		dismissedRecently() ||
 		document.querySelector("#install-prompt")
 	) {
@@ -63,16 +67,23 @@ function showPrompt() {
 	const bar = document.createElement("p");
 	bar.id = "install-prompt";
 	bar.className = "install-prompt";
-	const install = document.createElement("button");
-	install.type = "button";
-	install.className = "link-button";
-	install.textContent = "Install the app";
+	const install = inAppBrowser ? document.createElement("a") : document.createElement("button");
+	if (inAppBrowser) {
+		install.href = "/install";
+		install.textContent = "Install the app";
+	} else {
+		install.type = "button";
+		install.className = "link-button";
+		install.textContent = "Install the app";
+	}
 	const dismiss = document.createElement("button");
 	dismiss.type = "button";
 	dismiss.className = "link-button";
 	dismiss.setAttribute("aria-label", "Dismiss install prompt");
 	dismiss.textContent = "Not now";
-	install.addEventListener("click", promptInstall);
+	if (!inAppBrowser) {
+		install.addEventListener("click", promptInstall);
+	}
 	dismiss.addEventListener("click", () => {
 		write("pwaDismissedAt", String(Date.now()));
 		removePrompt();
@@ -105,3 +116,4 @@ window.addEventListener("beforeinstallprompt", (event) => {
 
 document.querySelector("#install-button")?.addEventListener("click", promptInstall);
 renderInstallPage();
+showPrompt();
