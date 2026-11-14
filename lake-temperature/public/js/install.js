@@ -21,7 +21,7 @@ const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "
 const isIos =
 	/iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
 	(window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
-const inAppBrowser = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(window.navigator.userAgent);
+const inAppBrowser = /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger/i.test(window.navigator.userAgent);
 let deferred = null;
 
 const visits = Number(read("pwaVisits") || 0) + 1;
