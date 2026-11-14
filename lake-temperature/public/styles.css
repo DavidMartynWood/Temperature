@@ -265,7 +265,8 @@ a.brand {
 	font-weight: 600;
 }
 
-a.button {
+a.button,
+button.button {
 	display: inline-flex;
 	align-items: center;
 	min-height: 2.75rem;
@@ -277,7 +278,8 @@ a.button {
 	text-decoration: none;
 }
 
-a.button:hover {
+a.button:hover,
+button.button:hover {
 	filter: brightness(1.08);
 }
 
@@ -1075,4 +1077,28 @@ figcaption {
 
 :root[data-theme="dark"] .uncover-error {
 	color: #ffb4b4;
+}
+
+button.button {
+	border: 0;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.install-prompt {
+	margin: 1rem auto;
+	text-align: center;
+	font-size: 0.95rem;
+}
+
+.link-button {
+	padding: 0.5rem;
+	border: 0;
+	background: none;
+	color: var(--accent);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: underline;
+	cursor: pointer;
 }

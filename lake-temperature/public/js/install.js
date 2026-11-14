@@ -1,0 +1,123 @@
+const COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const MIN_VISITS = 3;
+
+function read(key) {
+	try {
+		return localStorage.getItem(key);
+	} catch {
+		return null;
+	}
+}
+
+function write(key, value) {
+	try {
+		localStorage.setItem(key, value);
+	} catch {
+		// Preference just won't be remembered.
+	}
+}
+
+const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "/install";
+const isStandalone =
+	window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+let deferred = null;
+
+if (isStandalone) {
+	write("pwaInstalled", "1");
+}
+
+const visits = Number(read("pwaVisits") || 0) + 1;
+write("pwaVisits", String(visits));
+
+function installed() {
+	return isStandalone || read("pwaInstalled") === "1";
+}
+
+function dismissedRecently() {
+	const at = Number(read("pwaDismissedAt") || 0);
+	return Date.now() - at < COOLDOWN_MS;
+}
+
+function show(selector, visible) {
+	const el = document.querySelector(selector);
+	if (el) {
+		el.hidden = !visible;
+	}
+}
+
+function renderInstallPage() {
+	const done = installed();
+	show("#install-installed", done);
+	show("#install-ready", !done && deferred !== null);
+	show("#install-ios", !done && isIos);
+	show("#install-manual", !done && deferred === null && !isIos);
+}
+
+function removePrompt() {
+	document.querySelector("#install-prompt")?.remove();
+}
+
+function showPrompt() {
+	if (
+		onInstallPage ||
+		!deferred ||
+		installed() ||
+		visits < MIN_VISITS ||
+		dismissedRecently() ||
+		document.querySelector("#install-prompt")
+	) {
+		return;
+	}
+	const bar = document.createElement("p");
+	bar.id = "install-prompt";
+	bar.className = "install-prompt";
+	const install = document.createElement("button");
+	install.type = "button";
+	install.className = "link-button";
+	install.textContent = "Install the app";
+	const dismiss = document.createElement("button");
+	dismiss.type = "button";
+	dismiss.className = "link-button";
+	dismiss.setAttribute("aria-label", "Dismiss install prompt");
+	dismiss.textContent = "Not now";
+	install.addEventListener("click", promptInstall);
+	dismiss.addEventListener("click", () => {
+		write("pwaDismissedAt", String(Date.now()));
+		removePrompt();
+	});
+	bar.append(install, " · ", dismiss);
+	document.querySelector("footer")?.before(bar);
+}
+
+async function promptInstall() {
+	if (!deferred) {
+		return;
+	}
+	const event = deferred;
+	deferred = null;
+	removePrompt();
+	await event.prompt();
+	const { outcome } = await event.userChoice;
+	if (outcome === "dismissed") {
+		write("pwaDismissedAt", String(Date.now()));
+	}
+	renderInstallPage();
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+	event.preventDefault();
+	deferred = event;
+	renderInstallPage();
+	showPrompt();
+});
+
+window.addEventListener("appinstalled", () => {
+	write("pwaInstalled", "1");
+	deferred = null;
+	removePrompt();
+	renderInstallPage();
+});
+
+document.querySelector("#install-button")?.addEventListener("click", promptInstall);
+renderInstallPage();

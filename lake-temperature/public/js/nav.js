@@ -4,6 +4,7 @@ const pages = [
 	{ href: "/team", label: "Meet the team" },
 	{ href: "/events", label: "Events" },
 	{ href: "/partners", label: "Partners" },
+	{ href: "/install", label: "Install app" },
 ];
 
 function currentPath() {
