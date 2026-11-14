@@ -1,4 +1,4 @@
-const COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const COOLDOWN_MS = 90 * 24 * 60 * 60 * 1000;
 const MIN_VISITS = 3;
 
 function read(key) {
