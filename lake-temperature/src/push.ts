@@ -35,8 +35,8 @@ export function isPushEndpoint(value: unknown): value is string {
 }
 
 /**
- * Which reminder is due at this instant. Saturdays at 08:00 and Wednesdays at 16:00 UK time,
- * May to September only.
+ * Which reminder is due at this instant. Saturdays at 08:00 UK time all year, and
+ * Wednesdays at 16:00 UK time from May to September.
  */
 export function reminderDue(now: Date): Reminder | null {
   const parts = Object.fromEntries(
@@ -50,9 +50,8 @@ export function reminderDue(now: Date): Reminder | null {
   );
   const month = Number(parts.month);
   const hour = Number(parts.hour);
-  if (month < 5 || month > 9) return null;
   if (parts.weekday === "Saturday" && hour === 8) return "saturday";
-  if (parts.weekday === "Wednesday" && hour === 16) return "wednesday";
+  if (parts.weekday === "Wednesday" && hour === 16 && month >= 5 && month <= 9) return "wednesday";
   return null;
 }
 

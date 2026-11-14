@@ -14,10 +14,11 @@
 		"enabled": true
 	},
 	"upload_source_maps": true,
-	// Cron is UTC; May-September is always BST, so 07:00 and 15:00 UTC are 08:00 and 16:00 UK time.
-	// The Worker re-checks UK time. Triggers are not inherited by the dev and qa environments.
+	// Cron is UTC. Saturday 08:00 UK is 07:00 UTC in BST and 08:00 UTC in GMT, so both fire and the
+	// Worker sends on whichever is 08:00 UK. May-September is always BST, so Wednesday 16:00 UK is 15:00 UTC.
+	// Triggers are not inherited by the dev and qa environments.
 	"triggers": {
-		"crons": ["0 7 * 5-9 6", "0 15 * 5-9 3"]
+		"crons": ["0 7 * * 6", "0 8 * * 6", "0 15 * 5-9 3"]
 	},
 	"d1_databases": [
 		{

@@ -21,13 +21,15 @@ function database(latest, endpoints) {
 }
 
 describe("reminder schedule", () => {
-  it("fires Saturday 8am and Wednesday 4pm UK time, May to September only", () => {
+  it("fires Saturday 8am all year and Wednesday 4pm UK time May to September", () => {
     expect(reminderDue(new Date("2027-06-12T07:00:00Z"))).toBe("saturday");
+    expect(reminderDue(new Date("2027-01-09T08:00:00Z"))).toBe("saturday");
+    expect(reminderDue(new Date("2027-01-09T07:00:00Z"))).toBeNull();
+    expect(reminderDue(new Date("2027-01-06T16:00:00Z"))).toBeNull();
     expect(reminderDue(new Date("2027-06-09T15:00:00Z"))).toBe("wednesday");
     expect(reminderDue(new Date("2027-06-12T08:00:00Z"))).toBeNull();
-    expect(reminderDue(new Date("2027-04-10T07:00:00Z"))).toBeNull();
-    expect(reminderDue(new Date("2027-10-02T07:00:00Z"))).toBeNull();
-    expect(reminderDue(new Date("2027-01-09T08:00:00Z"))).toBeNull();
+    expect(reminderDue(new Date("2027-04-07T15:00:00Z"))).toBeNull();
+    expect(reminderDue(new Date("2027-10-06T15:00:00Z"))).toBeNull();
   });
 });
 

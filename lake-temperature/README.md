@@ -54,9 +54,9 @@ To update them, obtain the browser bundle from the corresponding upstream packag
 
 ## Event reminders
 
-On the Install page, users can opt in to a Saturday 8am ("Join us for a dip this morning?") and a Wednesday 4pm ("Join us for a swim this evening?") notification, each followed by "Water temperature is X °C". They run May to September only.
+On the Install page, users can opt in to a Saturday 8am ("Join us for a dip this morning?") and a Wednesday 4pm ("Join us for a swim this evening?") notification, each followed by "Water temperature is X °C". Saturdays run all year; Wednesdays run May to September only.
 
-- Cron triggers in `wrangler.jsonc` fire at 07:00 UTC Saturdays and 15:00 UTC Wednesdays, May to September (always BST, so 08:00 and 16:00 UK time); `reminderDue` re-checks UK time.
+- Cron triggers in `wrangler.jsonc` fire at 07:00 and 08:00 UTC on Saturdays (so one lands on 08:00 UK in both BST and GMT) and 15:00 UTC on Wednesdays, May to September (always BST, so 16:00 UK time); `reminderDue` checks UK time so only one Saturday trigger sends.
 - Nothing is sent if the latest reading is more than an hour old.
 - Pushes carry no payload, so no encryption is needed: `public/sw.js` fetches `/api/latest` and builds the text.
 - Setup: run `node scripts/generate-vapid-keys.mjs`, then store the output with `npx wrangler secret put VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (optionally `VAPID_SUBJECT`, a `mailto:` URL). Without them the option is hidden. On iPhone/iPad the app must be added to the home screen first.
