@@ -18,21 +18,11 @@ function write(key, value) {
 }
 
 const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "/install";
-const isStandalone =
-	window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 let deferred = null;
 
-if (isStandalone) {
-	write("pwaInstalled", "1");
-}
-
 const visits = Number(read("pwaVisits") || 0) + 1;
 write("pwaVisits", String(visits));
-
-function installed() {
-	return isStandalone || read("pwaInstalled") === "1";
-}
 
 function dismissedRecently() {
 	const at = Number(read("pwaDismissedAt") || 0);
@@ -47,11 +37,9 @@ function show(selector, visible) {
 }
 
 function renderInstallPage() {
-	const done = installed();
-	show("#install-installed", done);
-	show("#install-ready", !done && deferred !== null);
-	show("#install-ios", !done && isIos);
-	show("#install-manual", !done && deferred === null && !isIos);
+	show("#install-ready", deferred !== null);
+	show("#install-ios", isIos);
+	show("#install-manual", deferred === null && !isIos);
 }
 
 function removePrompt() {
@@ -62,7 +50,6 @@ function showPrompt() {
 	if (
 		onInstallPage ||
 		!deferred ||
-		installed() ||
 		visits < MIN_VISITS ||
 		dismissedRecently() ||
 		document.querySelector("#install-prompt")
@@ -110,13 +97,6 @@ window.addEventListener("beforeinstallprompt", (event) => {
 	deferred = event;
 	renderInstallPage();
 	showPrompt();
-});
-
-window.addEventListener("appinstalled", () => {
-	write("pwaInstalled", "1");
-	deferred = null;
-	removePrompt();
-	renderInstallPage();
 });
 
 document.querySelector("#install-button")?.addEventListener("click", promptInstall);
