@@ -18,7 +18,9 @@ function write(key, value) {
 }
 
 const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "/install";
-const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+const isIos =
+	/iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
+	(window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
 let deferred = null;
 
 const visits = Number(read("pwaVisits") || 0) + 1;
