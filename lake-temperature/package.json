@@ -7,10 +7,12 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261018.1",
+    "@playwright/test": "^1.65.1",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5",
     "wrangler": "^4.151.1"
