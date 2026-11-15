@@ -166,3 +166,6 @@ dist
 !.env.example
 .wrangler/
 qa-seed.sql
+
+test-results/
+playwright-report/
