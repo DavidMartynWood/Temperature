@@ -6,17 +6,24 @@
 		<meta name="theme-color" content="#eaf4f6" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
 		<title>Page not found | Ice Warriors</title>
-		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="manifest" href="/manifest.webmanifest" />
-		<link rel="apple-touch-icon" href="/images/icon-192.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
+		<a id="water-bar" class="water-bar" href="/temperature" data-state="loading">
+			<span class="water-bar-label">Welton Waters</span>
+			<span class="water-bar-temp" id="water-bar-temp">Water temperature</span>
+			<span class="water-bar-time" id="water-bar-time"></span>
+			<span class="water-bar-cta" aria-hidden="true">Graphs →</span>
+		</a>
 		<header class="page-header">
 				<a class="brand" href="/">
-					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
+					<img src="/images/ice-warriors-badge.svg" alt="" width="48" height="48" />
 					<div>
 						<p class="brand-name">Ice Warriors</p>
 						<p class="tagline">Welton Waters · It's never too cold</p>
@@ -68,5 +75,6 @@
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
 		<script type="module" src="/js/install.js"></script>
+		<script type="module" src="/js/water-bar.js"></script>
 	</body>
 </html>

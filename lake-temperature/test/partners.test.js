@@ -27,20 +27,29 @@ function request(body, ip = `test-${Math.random().toString(16).slice(2)}`) {
 }
 
 describe("partners data", () => {
-  it("lists Zone3 as the only live public partner", async () => {
+  it("lists Zone3 then ProSwimwear as the live public partners", async () => {
     const raw = await readFile(new URL("../public/data/partners.json", import.meta.url), "utf8");
     const { partners } = JSON.parse(raw);
     const zone3 = partners.find((partner) => partner.id === "zone3");
+    const proswimwear = partners.find((partner) => partner.id === "proswimwear");
 
-    expect(partners).toHaveLength(1);
     expect(zone3).toMatchObject({
       visibility: "public",
       code: "ICEWARRIORS",
       earnsCommission: true,
     });
     expect(zone3).not.toHaveProperty("terms");
+    expect(proswimwear).toMatchObject({
+      visibility: "public",
+      shopLink: null,
+    });
+    expect(proswimwear).not.toHaveProperty("code");
+    expect(proswimwear.actions.map((action) => action.link)).toEqual([
+      "https://www.proswimwear.co.uk/my-account/",
+      "https://www.proswimwear.co.uk/10-discount-for-swim-club-members",
+    ]);
     expect(hasMembersPartners(partners)).toBe(false);
-    expect(sortPartners(partners).map((partner) => partner.id)).toEqual(["zone3"]);
+    expect(sortPartners(partners).map((partner) => partner.id)).toEqual(["zone3", "proswimwear"]);
   });
 });
 
