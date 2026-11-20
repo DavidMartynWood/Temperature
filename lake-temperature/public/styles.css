@@ -830,6 +830,10 @@ figcaption {
 		padding: 0;
 		border-top: 0;
 	}
+
+	.nav-links a {
+		padding-inline: 0.55rem;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1288,6 +1292,11 @@ body.install-prompt-open {
 	margin-top: 0.75rem;
 }
 
+.partner-guide-copy a {
+	color: var(--accent);
+	font-weight: 600;
+}
+
 .partner-guide ol {
 	margin: 0;
 	padding-left: 1.25rem;
@@ -1307,6 +1316,7 @@ body.install-prompt-open {
 	.partner-guide {
 		grid-column: 1 / -1;
 		grid-template-columns: 40% minmax(0, 1fr);
+		grid-template-rows: auto 1fr;
 		grid-template-areas:
 			"image title"
 			"image copy";
