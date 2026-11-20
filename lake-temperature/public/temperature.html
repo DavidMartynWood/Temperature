@@ -119,11 +119,16 @@
 				<dialog id="polar-bear-dialog" aria-labelledby="polar-bear-dialog-title">
 					<h2 id="polar-bear-dialog-title">Download Polar Bear Challenge temp reading</h2>
 					<form id="polar-bear-form">
-						<label for="polar-bear-date">Date</label>
-						<input id="polar-bear-date" name="date" type="date" required />
-						<label for="polar-bear-time">Time of your swim</label>
-						<input id="polar-bear-time" name="time" type="time" required />
-						<p><button type="submit" class="button">Make image</button></p>
+						<div class="polar-bear-fields">
+							<div>
+								<label for="polar-bear-date">Date</label>
+								<input id="polar-bear-date" name="date" type="date" required />
+							</div>
+							<div>
+								<label for="polar-bear-time">Time of your swim</label>
+								<input id="polar-bear-time" name="time" type="time" required />
+							</div>
+						</div>
 					</form>
 					<p id="polar-bear-message" role="status"></p>
 					<div id="polar-bear-result" hidden>
@@ -134,9 +139,12 @@
 							<button type="button" id="polar-bear-share" class="button" hidden>Share</button>
 						</p>
 					</div>
-					<form method="dialog">
-						<button type="submit" class="button">Close</button>
-					</form>
+					<div class="polar-bear-actions">
+						<button type="submit" class="button" form="polar-bear-form">Make image</button>
+						<form method="dialog">
+							<button type="submit" class="button button-quiet">Close</button>
+						</form>
+					</div>
 				</dialog>
 			</section>
 		</main>

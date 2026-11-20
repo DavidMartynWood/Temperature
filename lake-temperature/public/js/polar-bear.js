@@ -270,7 +270,7 @@ if (typeof document !== "undefined") {
 				return;
 			}
 
-			const submit = form.querySelector('button[type="submit"]');
+			const submit = document.querySelector('button[type="submit"][form="polar-bear-form"]');
 			if (submit instanceof HTMLButtonElement) submit.disabled = true;
 			try {
 				const range = historyWindow(swimMs, earliest);
