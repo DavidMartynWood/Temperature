@@ -7,8 +7,8 @@
 		// The path to the directory containing the `index.html` file to be served at `/`
 		"directory": "./public",
 		"binding": "ASSETS",
-		// Lets the Worker pre-render the latest temperature into the home page.
-		"run_worker_first": ["/"]
+		// Lets the Worker pre-render the latest temperature into /temperature.
+		"run_worker_first": ["/temperature"]
 	},
 	"observability": {
 		"enabled": true

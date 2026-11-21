@@ -2,7 +2,9 @@ const STORAGE_KEY = "partners-uncovered";
 const MASK = "••••••••";
 
 /**
- * @typedef {{ id: string, name: string, logo?: string, offer: string, code?: string, link?: string, terms?: string, earnsCommission?: boolean, visibility: "public" | "members", order: number }} Partner
+ * @typedef {{ label: string, link: string }} PartnerAction
+ * @typedef {{ portrait: string, square: string, alt: string }} PartnerImage
+ * @typedef {{ id: string, name: string, logo?: string, offer: string, code?: string, link?: string, terms?: string, earnsCommission?: boolean, visibility: "public" | "members", order: number, intro?: string, steps?: string[], note?: string, actions?: PartnerAction[], shopLink?: string | null, image?: PartnerImage }} Partner
  * @typedef {{ code?: string, link?: string }} HiddenFields
  */
 
@@ -66,6 +68,114 @@ async function copyCode(code, button) {
 	} catch {
 		button.textContent = "Copy failed";
 	}
+}
+
+const URL_IN_TEXT = /https?:\/\/[^\s]+/g;
+
+/**
+ * @param {HTMLElement} parent
+ * @param {string} text
+ */
+function appendTextWithLinks(parent, text) {
+	let last = 0;
+	for (const match of text.matchAll(URL_IN_TEXT)) {
+		const raw = match[0];
+		const url = raw.replace(/[.)]+$/, "");
+		const index = match.index ?? 0;
+		if (index > last) {
+			parent.append(text.slice(last, index));
+		}
+		const link = document.createElement("a");
+		link.href = url;
+		link.target = "_blank";
+		link.rel = "noopener noreferrer";
+		link.textContent = url;
+		parent.append(link);
+		const trailing = raw.slice(url.length);
+		if (trailing) parent.append(trailing);
+		last = index + raw.length;
+	}
+	if (last < text.length) parent.append(text.slice(last));
+}
+
+/**
+ * Full-width guide for a partner that explains the steps instead of showing a code.
+ * @param {Partner} partner
+ * @returns {{ card: HTMLElement, applyHidden: (fields: HiddenFields) => void }}
+ */
+function renderGuide(partner) {
+	const article = document.createElement("article");
+	article.className = "partner-guide";
+	article.dataset.partnerId = partner.id;
+
+	const title = document.createElement("h2");
+	title.className = "partner-guide-title";
+	title.textContent = partner.offer;
+
+	const picture = document.createElement("picture");
+	if (partner.image) {
+		const source = document.createElement("source");
+		source.media = "(min-width: 40rem)";
+		source.srcset = partner.image.portrait;
+		source.width = 1080;
+		source.height = 1350;
+		const img = document.createElement("img");
+		img.src = partner.image.square;
+		img.alt = partner.image.alt;
+		img.width = 1080;
+		img.height = 1080;
+		img.loading = "lazy";
+		picture.append(source, img);
+	}
+
+	const copy = document.createElement("div");
+	copy.className = "partner-guide-copy";
+
+	if (partner.intro) {
+		const intro = document.createElement("p");
+		intro.textContent = partner.intro;
+		copy.append(intro);
+	}
+
+	const steps = document.createElement("ol");
+	for (const step of partner.steps ?? []) {
+		const item = document.createElement("li");
+		appendTextWithLinks(item, step);
+		steps.append(item);
+	}
+	copy.append(steps);
+
+	if (partner.note) {
+		const note = document.createElement("p");
+		note.className = "note";
+		note.textContent = partner.note;
+		copy.append(note);
+	}
+
+	const actions = document.createElement("div");
+	actions.className = "partner-guide-actions";
+	for (const action of partner.actions ?? []) {
+		const link = document.createElement("a");
+		link.className = "partner-shop";
+		link.href = action.link;
+		link.target = "_blank";
+		link.rel = "noopener noreferrer";
+		link.textContent = action.label;
+		actions.append(link);
+	}
+	if (partner.shopLink) {
+		const shop = document.createElement("a");
+		shop.className = "partner-shop";
+		shop.href = partner.shopLink;
+		shop.target = "_blank";
+		shop.rel = "noopener noreferrer sponsored";
+		shop.textContent = "Shop ProSwimwear";
+		actions.append(shop);
+	}
+	copy.append(actions);
+
+	article.append(title, picture, copy);
+	return { card: article, applyHidden() {} };
 }
 
 /**
@@ -197,6 +307,10 @@ async function main() {
 
 	listEl.replaceChildren();
 	for (const partner of partners) {
+		if (!partner.code && partner.steps?.length) {
+			listEl.append(renderGuide(partner).card);
+			continue;
+		}
 		const hidden = partner.visibility === "members" ? secrets[partner.id] : undefined;
 		const { card, applyHidden } = renderCard(partner, hidden);
 		applyById.set(partner.id, applyHidden);

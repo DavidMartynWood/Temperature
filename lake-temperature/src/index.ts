@@ -1,3 +1,4 @@
+import { STALE_READING_MS } from "../public/js/config.js";
 import { describeTemperature, formatRelativeTime, formatTemperature, getTrend, summarise } from "../public/js/insights.js";
 import { getHistory, getLatest, health, postReading } from "./handlers";
 import { uncoverPartners } from "./partners";
@@ -18,8 +19,8 @@ export default {
         return getHistory(url, env);
       case "POST /api/partners/uncover":
         return uncoverPartners(request, env);
-      case "GET /":
-        return renderHome(request, env);
+      case "GET /temperature":
+        return renderTemperature(request, env);
       default: {
         if (url.pathname === "/images/new-years-day-dip-2027.pdf") {
           return Response.redirect(new URL("/events/new-years-day-dip-2027.pdf", url).toString(), 301);
@@ -57,7 +58,7 @@ interface Last24h {
  * Pre-renders the current temperature and 24 hour statistics so crawlers, non-JS clients
  * and first paint don't see placeholders. The same data is embedded for main.js to reuse.
  */
-async function renderHome(request: Request, env: Env): Promise<Response> {
+async function renderTemperature(request: Request, env: Env): Promise<Response> {
   const page = await env.ASSETS.fetch(request);
   try {
     const [latestResponse, historyResponse] = await Promise.all([
@@ -79,8 +80,24 @@ async function renderHome(request: Request, env: Env): Promise<Response> {
       },
     });
     const bootstrap = JSON.stringify({ reading, last24h }).replace(/</g, "\\u003c");
+    const loggedMs = Date.parse(reading.timestamp);
+    const stale = Date.now() - loggedMs > STALE_READING_MS;
+    const relative = formatRelativeTime(loggedMs)!;
 
     return new HTMLRewriter()
+      .on("#water-bar", {
+        element(element) {
+          element.setAttribute("data-state", stale ? "stale" : "ok");
+          element.setAttribute("aria-current", "page");
+        },
+      })
+      .on("#water-bar-temp", text(stale ? "⚠ Sensor offline?" : `${formatTemperature(reading.temperature_c, "C")} °C`))
+      .on("#water-bar-time", text(stale ? `Last reading ${relative}` : `· ${relative}`))
+      .on(".water-bar-cta", {
+        element(element) {
+          element.setAttribute("hidden", "");
+        },
+      })
       .on("#temperature", {
         element(element) {
           element.setInnerContent(`${formatTemperature(reading.temperature_c, "C")}<span class="unit">°C</span>`, { html: true });

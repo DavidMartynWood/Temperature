@@ -10,10 +10,15 @@ Cloudflare Worker (API + D1 database) and static website showing the current and
 | `src/handlers.ts` | One function per endpoint (SQL lives here) |
 | `src/validation.ts` | Input validation helpers |
 | `src/config.ts` | Constants (earliest history date, limits) |
-| `public/index.html`, `public/styles.css` | Page markup and styles |
+| `public/index.html` | Club home page: sessions, next event, shop and partner links |
+| `public/temperature.html`, `public/styles.css` | Water temperature page (hero, stats, history graph) and shared styles. The Worker pre-renders `GET /temperature` |
+| `public/js/water-bar.js` | Live temperature strip on every page. Cached for 5 minutes; `/temperature` is updated by `main.js` |
+| `public/js/polar-bear.js` | Polar Bear Challenge evidence image on the temperature page |
+| `public/js/events.js`, `public/data/events.json` | Next event on the home page, and moving finished events to Past events |
 | `public/partners.html`, `public/js/partners.js`, `public/data/partners.json` | Partners page: public offers from JSON; members codes via uncover API |
 | `src/partners.ts` | `POST /api/partners/uncover` (passphrase gate; stub `CODE` until Cloudflare secrets) |
-| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring), `partners.js`, `nav.js` |
+| `public/js/` | Frontend ES modules: `api.js` (fetch), `range.js` (history windows), `insights.js` (units, labels, trend, relative time), `chart.js` (Chart.js wrapper), `main.js` (wiring), `partners.js`, `nav.js`, `install.js`, `water-bar.js`, `events.js`, `polar-bear.js` |
+| `public/manifest.webmanifest` | Installed app: `id` is `/`, `start_url` is `/temperature` |
 | `public/vendor/` | Vendored browser bundles for Chart.js and its date adapter; loaded as globals, no build step |
 | `migrations/` | D1 schema migrations |
 
@@ -21,14 +26,27 @@ The earliest history date is present in the Worker, browser configuration, and t
 
 ## Website UI
 
-The page is built for people who want to know the current lake temperature at a glance:
+`/` is the club page: when the group swims, the next event, the shop, and partner discounts. The graphs live at `/temperature`.
 
-- **Hero card**: a very large current temperature, a °C/°F toggle (remembered in `localStorage`), a Cold / Cool / Comfortable / Warm label (cut-offs in `public/js/insights.js`), and a relative "last updated" time with the exact timestamp on hover. Readings older than 12 hours show an offline warning.
+A sticky bar at the top of every page shows the latest Welton Waters reading and links to `/temperature`. On that page the hero still has the large temperature, the depth note, the °C/°F toggle, and the history graph.
+
+- **Hero card** (`/temperature`): a very large current temperature, a °C/°F toggle (remembered in `localStorage`), a Cold / Cool / Comfortable / Warm label (cut-offs in `public/js/insights.js`), and a relative "last updated" time with the exact timestamp on hover. Readings older than 12 hours show an offline warning. The number is the water temperature at 0.25 m depth.
 - **At a glance**: trend over the last 3 hours (rising / falling / steady) and the 24h low, high and average.
 - **History chart**: 24h, 7d and 30d rolling windows plus 1y and All, with tooltips and loading, empty and error (with retry) states.
+- **Polar Bear Challenge**: on `/temperature`, a dialog makes a 1080×1350 image of the logged venue reading nearest the swim time. Nothing is sent except the history request.
 - **Accessibility**: semantic landmarks, ARIA labels, visible focus, skip link, AA contrast, reduced-motion support. Meaning is never conveyed by colour alone: labels use text plus symbols and different border styles, trend uses arrows, stale data uses a text banner and a different marker shape, and chart series use different line styles.
 - **Theme**: follows `prefers-color-scheme`, with a manual light/dark toggle remembered in `localStorage`.
-- **Auto-refresh**: the latest reading refreshes every minute and history every five minutes while the tab is visible; no page reload is needed.
+- **Auto-refresh**: on `/temperature`, the latest reading refreshes every minute and history every five minutes while the tab is visible. Other pages reuse a 5-minute cache of `/api/latest`.
+
+The site can be installed as an app. The manifest id stays `/` so existing installs are the same app, and `start_url` is `/temperature`. An installed app opened at `/` is sent to `/temperature` once per session; choosing Home after that stays on the club page. The install banner is our own (Chrome's mini-infobar stays suppressed): it appears from the second visit on `/` and `/temperature`, not in the installed app, and "Not now" hides it for 30 days. iPhone and iPad get short Add to Home Screen instructions.
+
+### Adding an event
+
+1. Add an entry to `public/data/events.json`. `start` and `end` are ISO 8601 with an offset (`Z` in winter, `+01:00` in summer). `id` must match the card.
+2. Copy a card in `public/events.html` and give it the same `id`.
+3. Optionally add an `.ics` file and a poster in `public/events/`.
+
+Old cards can be deleted whenever you like. If the card is kept, it stays hidden once the event is past, and the home page shows the next one. The check runs in the visitor's browser.
 
 To capture screenshots, run `npm run dev`, open the local URL, and take light and dark mode screenshots at mobile (about 390px) and desktop widths.
 
