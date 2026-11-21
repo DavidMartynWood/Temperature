@@ -80,7 +80,7 @@ function render() {
 	time.textContent = stale
 		? `Last reading ${formatRelativeTime(loggedMs)}`
 		: `· ${formatRelativeTime(loggedMs)}`;
-	bar.title = `Water temp at 1 m depth, logged ${loggedLabel(loggedMs)}`;
+	bar.title = `Water temp at 0.25 m depth, logged ${loggedLabel(loggedMs)}`;
 }
 
 /** @param {{ timestamp: string, temperature_c: number } | null} next */

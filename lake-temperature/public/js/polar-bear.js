@@ -10,7 +10,7 @@ const SEARCH_WINDOW_MS = 12 * 60 * 60 * 1000;
 
 export const VENUE_STATEMENT = "Official Welton Waters venue water temperature reading";
 export const SENSOR_LABEL = "Ice Warriors venue sensor";
-export const DEPTH_LABEL = "Water temp at 1 m depth";
+export const DEPTH_LABEL = "Water temp at 0.25 m depth";
 
 /** Offset (ms) of Europe/London from UTC at the given instant. */
 function londonOffsetMs(instantMs) {
@@ -142,7 +142,7 @@ export function drawEvidenceCard(canvas, { swimMs, reading, gapMs, logo, nowMs =
 	context.fill();
 	const rows = [
 		["Venue", "Welton Waters Adventure Centre, Welton"],
-		["Venue reading", `${value} °C at 1 m depth`],
+		["Venue reading", `${value} °C at 0.25 m depth`],
 		["Reading logged", formatDateTime(readingMs)],
 		["Your swim", formatDateTime(swimMs)],
 	];
@@ -302,7 +302,7 @@ if (typeof document !== "undefined") {
 					preview.alt = `${VENUE_STATEMENT} (${SENSOR_LABEL}). ${DEPTH_LABEL}.`;
 				}
 				const loggedMs = Date.parse(nearest.reading.timestamp);
-				const line = `Venue reading: ${formatLogged(nearest.reading.temperature_c)} °C at 1 m depth, logged ${formatTime(loggedMs)}, ${describeGap(nearest.gapMs)}.`;
+				const line = `Venue reading: ${formatLogged(nearest.reading.temperature_c)} °C at 0.25 m depth, logged ${formatTime(loggedMs)}, ${describeGap(nearest.gapMs)}.`;
 				if (summary instanceof HTMLElement) summary.textContent = line;
 				const flagged = Math.abs(nearest.gapMs) > FLAG_GAP_MS;
 				setMessage(flagged ? `⚠ Nearest logged reading is ${describeGap(nearest.gapMs)}` : "");

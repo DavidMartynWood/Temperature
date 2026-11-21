@@ -30,7 +30,7 @@ The earliest history date is present in the Worker, browser configuration, and t
 
 A sticky bar at the top of every page shows the latest Welton Waters reading and links to `/temperature`. On that page the hero still has the large temperature, the depth note, the °C/°F toggle, and the history graph.
 
-- **Hero card** (`/temperature`): a very large current temperature, a °C/°F toggle (remembered in `localStorage`), a Cold / Cool / Comfortable / Warm label (cut-offs in `public/js/insights.js`), and a relative "last updated" time with the exact timestamp on hover. Readings older than 12 hours show an offline warning. The number is the water temperature at 1 m depth.
+- **Hero card** (`/temperature`): a very large current temperature, a °C/°F toggle (remembered in `localStorage`), a Cold / Cool / Comfortable / Warm label (cut-offs in `public/js/insights.js`), and a relative "last updated" time with the exact timestamp on hover. Readings older than 12 hours show an offline warning. The number is the water temperature at 0.25 m depth.
 - **At a glance**: trend over the last 3 hours (rising / falling / steady) and the 24h low, high and average.
 - **History chart**: 24h, 7d and 30d rolling windows plus 1y and All, with tooltips and loading, empty and error (with retry) states.
 - **Polar Bear Challenge**: on `/temperature`, a dialog makes a 1080×1350 image of the logged venue reading nearest the swim time. Nothing is sent except the history request.
