@@ -1,0 +1,39 @@
+{
+	"partners": [
+		{
+			"id": "zone3",
+			"name": "Zone3",
+			"logo": "/images/zone3-wordmark.svg",
+			"offer": "15% off full-priced items",
+			"code": "ICEWARRIORS",
+			"link": "https://zone3.com/discount/ICEWARRIORS?dt_id=3686857&utm_source=clubs&utm_campaign=ICEWARRIORS",
+			"earnsCommission": true,
+			"visibility": "public",
+			"order": 1
+		},
+		{
+			"id": "proswimwear",
+			"name": "ProSwimwear",
+			"offer": "10% off at ProSwimwear",
+			"intro": "For club members. Set this up once, then shop signed in.",
+			"steps": [
+				"Create a free account at https://www.proswimwear.co.uk/my-account/.",
+				"Fill in the club member form at https://www.proswimwear.co.uk/10-discount-for-swim-club-members. Pick “Ice Warriors” and use the same email.",
+				"Wait up to 2 working days. After the confirmation email, 10% comes off automatically whenever you’re signed in."
+			],
+			"note": "No code needed. Can’t be combined with other discount codes.",
+			"actions": [
+				{ "label": "Create an account", "link": "https://www.proswimwear.co.uk/my-account/" },
+				{ "label": "Fill in the club form", "link": "https://www.proswimwear.co.uk/10-discount-for-swim-club-members" }
+			],
+			"shopLink": null,
+			"image": {
+				"portrait": "/images/proswimwear-10-percent-portrait.png",
+				"square": "/images/proswimwear-10-percent-square.png",
+				"alt": "Illustrated guide to the Ice Warriors 10% ProSwimwear discount."
+			},
+			"visibility": "public",
+			"order": 2
+		}
+	]
+}

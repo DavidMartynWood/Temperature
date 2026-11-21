@@ -55,5 +55,15 @@ export async function safeEqual(a: string, b: string): Promise<boolean> {
     crypto.subtle.digest("SHA-256", encoder.encode(a)),
     crypto.subtle.digest("SHA-256", encoder.encode(b)),
   ]);
-  return crypto.subtle.timingSafeEqual(left, right);
+  const leftBytes = new Uint8Array(left);
+  const rightBytes = new Uint8Array(right);
+  if (typeof crypto.subtle.timingSafeEqual === "function") {
+    return crypto.subtle.timingSafeEqual(leftBytes, rightBytes);
+  }
+  // Node's webcrypto omits timingSafeEqual; still compare full digests without early exit.
+  let diff = 0;
+  for (let i = 0; i < leftBytes.length; i += 1) {
+    diff |= leftBytes[i] ^ rightBytes[i];
+  }
+  return diff === 0;
 }

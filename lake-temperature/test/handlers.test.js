@@ -142,7 +142,7 @@ describe("history date configuration", () => {
   it("keeps the Worker, browser, and page availability date aligned", async () => {
     expect(clientEarliestHistoryDate).toBe(EARLIEST_HISTORY_DATE);
 
-    const html = await readFile(new URL("../public/index.html", import.meta.url), "utf8");
+    const html = await readFile(new URL("../public/temperature.html", import.meta.url), "utf8");
     const date = new Date(`${EARLIEST_HISTORY_DATE}T00:00:00.000Z`)
       .toLocaleDateString("en-GB", {
         day: "numeric",

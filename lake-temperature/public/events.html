@@ -5,24 +5,33 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="theme-color" content="#eaf4f6" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
-		<meta name="description" content="Ice Warriors events. New Year's Day dip at Welton Waters on Friday 1 January 2027." />
+		<meta name="description" content="Ice Warriors events at Welton Waters: what's coming up, and past events." />
 		<title>Events | Ice Warriors</title>
 		<link rel="canonical" href="https://icewarriors.org.uk/events" />
 		<meta property="og:title" content="Events | Ice Warriors" />
-		<meta property="og:description" content="Ice Warriors events. New Year's Day dip at Welton Waters on Friday 1 January 2027." />
+		<meta property="og:description" content="Ice Warriors events at Welton Waters: what's coming up, and past events." />
 		<meta property="og:url" content="https://icewarriors.org.uk/events" />
 		<meta property="og:image" content="https://icewarriors.org.uk/images/og.jpg" />
 		<meta property="og:type" content="website" />
 		<meta name="twitter:card" content="summary_large_image" />
-		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
+		<a id="water-bar" class="water-bar" href="/temperature" data-state="loading">
+			<span class="water-bar-label">Welton Waters</span>
+			<span class="water-bar-temp" id="water-bar-temp">Water temperature</span>
+			<span class="water-bar-time" id="water-bar-time"></span>
+			<span class="water-bar-cta" aria-hidden="true">Graphs →</span>
+		</a>
 		<header class="page-header">
 				<a class="brand" href="/">
-					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
+					<img src="/images/ice-warriors-badge.svg" alt="" width="48" height="48" />
 					<div>
 						<p class="brand-name">Ice Warriors</p>
 						<p class="tagline">Welton Waters · It's never too cold</p>
@@ -44,7 +53,7 @@
 					<h1 class="page-title">Events</h1>
 				</div>
 
-				<section class="card copy" aria-labelledby="nyd-title">
+				<section class="card copy" id="nyd-2027" aria-labelledby="nyd-title">
 					<h2 id="nyd-title">New Year's Day dip</h2>
 					<dl class="facts">
 						<div>
@@ -97,6 +106,12 @@
 					<p>Swimming is optional. If you're unsure, you can always have a dip and come straight back out. Only swim if you're comfortable.</p>
 					<p><a href="/events/new-years-day-dip-2027.pdf">New Year's Day dip poster (PDF, 572 KB)</a></p>
 				</section>
+
+				<p id="no-upcoming" class="card copy" hidden>Nothing planned just yet. New events go here and in our <a href="https://www.facebook.com/groups/team.ice.warriors/" target="_blank" rel="noopener noreferrer">Facebook group</a>.</p>
+				<section id="past-events" class="card copy" aria-labelledby="past-title" hidden>
+					<h2 id="past-title">Past events</h2>
+					<ul id="past-events-list"></ul>
+				</section>
 			</article>
 		</main>
 
@@ -127,6 +142,9 @@
 		</footer>
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
+		<script type="module" src="/js/install.js"></script>
+		<script type="module" src="/js/water-bar.js"></script>
+		<script type="module" src="/js/events.js"></script>
 		<script type="module" src="/js/route.js"></script>
 	</body>
 </html>

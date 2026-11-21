@@ -1,9 +1,15 @@
 const pages = [
 	{ href: "/", label: "Home" },
+	{ href: "/temperature", label: "Temperature" },
 	{ href: "/about", label: "About" },
 	{ href: "/team", label: "Meet the team" },
 	{ href: "/events", label: "Events" },
+	{ href: "/partners", label: "Partners" },
+	{ href: "https://shop.icewarriors.org.uk", label: "Shop", external: true },
+	{ href: "/install", label: "Install app" },
 ];
+const isStandalone =
+	window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
 function currentPath() {
 	let path = window.location.pathname;
@@ -37,10 +43,24 @@ if (nav) {
 	menu.className = "nav-links";
 
 	for (const page of pages) {
+		if (isStandalone && page.href === "/install") {
+			continue;
+		}
 		const link = document.createElement("a");
 		link.href = page.href;
 		link.textContent = page.label;
-		if (page.href === here) {
+		if (page.external) {
+			link.target = "_blank";
+			link.rel = "noopener noreferrer";
+			const mark = document.createElement("span");
+			mark.className = "external";
+			mark.setAttribute("aria-hidden", "true");
+			mark.textContent = "↗";
+			const hint = document.createElement("span");
+			hint.className = "visually-hidden";
+			hint.textContent = " (opens in a new tab)";
+			link.append(mark, hint);
+		} else if (page.href === here) {
 			link.setAttribute("aria-current", "page");
 		}
 		menu.append(link);
@@ -62,7 +82,7 @@ if (nav) {
 	});
 
 	menu.addEventListener("click", (event) => {
-		if (event.target instanceof HTMLAnchorElement) {
+		if (event.target instanceof Element && event.target.closest("a")) {
 			setOpen(false);
 		}
 	});

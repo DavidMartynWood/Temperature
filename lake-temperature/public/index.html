@@ -5,37 +5,43 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="theme-color" content="#eaf4f6" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0b1d26" media="(prefers-color-scheme: dark)" />
-		<meta name="description" content="Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers. It's never too cold." />
-		<title>Ice Warriors | Welton Waters water temperature</title>
+		<meta name="description" content="Ice Warriors open water swimmers at Welton Waters Adventure Centre. Live water temperature, sessions, events and club kit." />
+		<title>Ice Warriors | Open water swimming at Welton Waters</title>
 		<link rel="canonical" href="https://icewarriors.org.uk/" />
-		<meta property="og:title" content="Ice Warriors | Welton Waters water temperature" />
-		<meta property="og:description" content="Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers. It's never too cold." />
+		<meta property="og:title" content="Ice Warriors | Open water swimming at Welton Waters" />
+		<meta property="og:description" content="Ice Warriors open water swimmers at Welton Waters Adventure Centre. Live water temperature, sessions, events and club kit." />
 		<meta property="og:url" content="https://icewarriors.org.uk/" />
 		<meta property="og:image" content="https://icewarriors.org.uk/images/og.jpg" />
 		<meta property="og:type" content="website" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Ice Warriors","url":"https://icewarriors.org.uk/","description":"Live water temperature at Welton Waters Adventure Centre for the Ice Warriors open water swimmers."}</script>
-		<link rel="icon" type="image/png" href="/images/ice-warriors.png" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<script>try{if((matchMedia("(display-mode: standalone)").matches||navigator.standalone)&&!sessionStorage.getItem("appSession")){sessionStorage.setItem("appSession","1");location.replace("/temperature")}}catch(e){}</script>
 		<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
-		<a class="skip-link" href="#current">Skip to current temperature</a>
+		<a class="skip-link" href="#content">Skip to content</a>
+		<a id="water-bar" class="water-bar" href="/temperature" data-state="loading">
+			<span class="water-bar-label">Welton Waters</span>
+			<span class="water-bar-temp" id="water-bar-temp">Water temperature</span>
+			<span class="water-bar-time" id="water-bar-time"></span>
+			<span class="water-bar-cta" aria-hidden="true">Graphs →</span>
+		</a>
 		<header class="page-header">
-				<div class="brand">
-					<img src="/images/ice-warriors-mark.png" alt="" width="56" height="50" />
+				<a class="brand" href="/">
+					<img src="/images/ice-warriors-badge.svg" alt="" width="48" height="48" />
 					<div>
-						<h1>Ice Warriors</h1>
+						<p class="brand-name">Ice Warriors</p>
 						<p class="tagline">Welton Waters · It's never too cold</p>
 					</div>
-				</div>
+				</a>
 				<div class="header-tools">
 					<nav id="site-nav" aria-label="Pages"></nav>
 					<div class="toolbar">
-						<div class="segmented" id="unit-controls" role="group" aria-label="Temperature unit">
-							<button type="button" data-unit="C" aria-pressed="true">°C</button>
-							<button type="button" data-unit="F" aria-pressed="false">°F</button>
-						</div>
 						<button type="button" id="theme-toggle" class="icon-button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">
 							<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
 						</button>
@@ -43,64 +49,39 @@
 				</div>
 		</header>
 
-		<main>
-			<section id="current" class="card hero" aria-labelledby="current-title" tabindex="-1">
-				<h2 id="current-title" class="eyebrow">Current water temperature</h2>
-				<p id="temperature" class="hero-temperature" aria-live="polite" aria-atomic="true"><span class="loading-text">Loading…</span></p>
-				<p id="condition" class="badge" hidden><span id="condition-symbol" aria-hidden="true"></span> <span id="condition-text"></span></p>
-				<p id="condition-hint" class="hint" hidden></p>
-				<p id="reading-time" class="reading-time" hidden>
-					<span id="status-dot" class="status-dot" aria-hidden="true"></span>
-					Updated <time id="timestamp"></time>
+		<main id="content" tabindex="-1" data-install-prompt>
+			<section class="card hero home-hero" aria-labelledby="home-title">
+				<p class="eyebrow">It's never too cold</p>
+				<h1 id="home-title" class="page-title">Open water swimming at Welton Waters</h1>
+				<p class="lede">Ice Warriors swim together in the open water at Welton Waters Adventure Centre.</p>
+				<p class="home-actions">
+					<a class="button" href="/temperature">Water temperature</a>
+					<a class="button button-ghost" href="/about">Come along</a>
 				</p>
-				<p id="stale-warning-message" class="stale-banner" role="status" hidden>
-					<span aria-hidden="true">⚠</span> Offline? This reading is out of date, so there may be a technical problem with the sensor.
-				</p>
-				<p id="error-message" class="stale-banner" role="alert" hidden></p>
 			</section>
-
-			<section id="stats" class="stats" aria-label="Last 24 hours at a glance">
-				<div class="card stat">
-					<h3>Trend</h3>
-					<p id="trend" class="stat-value">–</p>
-					<p id="trend-detail" class="stat-detail">Last 3 hours</p>
-				</div>
-				<div class="card stat">
-					<h3>24h low</h3>
-					<p id="stat-min" class="stat-value">–</p>
-				</div>
-				<div class="card stat">
-					<h3>24h high</h3>
-					<p id="stat-max" class="stat-value">–</p>
-				</div>
-				<div class="card stat">
-					<h3>24h average</h3>
-					<p id="stat-average" class="stat-value">–</p>
-				</div>
-			</section>
-
-			<section id="history" class="card" aria-labelledby="history-title">
-				<div class="history-header">
-					<h2 id="history-title">Temperature history</h2>
-					<div id="range-controls" class="segmented" role="group" aria-label="History range">
-						<button type="button" data-range="day" aria-pressed="true">24h</button>
-						<button type="button" data-range="yesterday" aria-pressed="false">Yesterday</button>
-						<button type="button" data-range="week" aria-pressed="false">7d</button>
-						<button type="button" data-range="month" aria-pressed="false">30d</button>
-						<button type="button" data-range="year" aria-pressed="false">1y</button>
-						<button type="button" data-range="all" aria-pressed="false">All</button>
+			<div class="home-grid">
+				<section class="card copy" aria-labelledby="when-title">
+					<h2 id="when-title">When</h2>
+					<p>Wednesday evenings from May through to September (weather permitting). Arrive any time between 5pm and 7pm. Last entry to the water is 6.30pm.</p>
+					<p><a href="/about">Where, safety and how to join</a></p>
+				</section>
+				<section class="card copy" id="next-event" aria-labelledby="next-title">
+					<h2 id="next-title">Next event</h2>
+					<div id="next-event-body">
+						<p>See what's coming up on the <a href="/events">events page</a>.</p>
 					</div>
-				</div>
-				<div id="chart-container">
-					<canvas id="chart" role="img" aria-label="Loading temperature history"></canvas>
-					<div id="chart-overlay" class="chart-overlay" hidden>
-						<p id="chart-overlay-text"></p>
-						<button type="button" id="retry-history" hidden>Try again</button>
-					</div>
-				</div>
-				<p id="history-status" aria-live="polite"></p>
-				<p class="note">History available from 18 October 2026.</p>
-			</section>
+				</section>
+				<section class="card copy" aria-labelledby="shop-title">
+					<h2 id="shop-title">Club shop</h2>
+					<p>Club hats, kit bundles and bags. Collect from Welton Waters by arrangement.</p>
+					<p><a href="https://shop.icewarriors.org.uk" target="_blank" rel="noopener noreferrer">Visit the shop<span class="visually-hidden"> (opens in a new tab)</span> <span aria-hidden="true">↗</span></a></p>
+				</section>
+				<section class="card copy" aria-labelledby="partners-title">
+					<h2 id="partners-title">Partner discounts</h2>
+					<p>Club discounts from Zone3 and ProSwimwear.</p>
+					<p><a href="/partners">See the offers</a></p>
+				</section>
+			</div>
 		</main>
 
 		<footer id="social-links">
@@ -128,8 +109,10 @@
 					</a>
 				</p>
 		</footer>
-		<script src="/vendor/chart.umd.js" defer></script>
-		<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js" defer></script>
-		<script type="module" src="/js/main.js"></script>
+		<script type="module" src="/js/theme.js"></script>
+		<script type="module" src="/js/nav.js"></script>
+		<script type="module" src="/js/install.js"></script>
+		<script type="module" src="/js/water-bar.js"></script>
+		<script type="module" src="/js/events.js"></script>
 	</body>
 </html>

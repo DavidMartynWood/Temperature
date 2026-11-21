@@ -94,11 +94,13 @@ The website labels the latest reading using these ranges (defined in `lake-tempe
 | --- | --- | --- |
 | Below 1 | 🧊 Ice | Get down here now, you'll remember this one! |
 | 1 to below 3 | 🥶 Shivers | Let the shivers commence |
-| 3 to below 5 | ❄ Cold | Bobble hat time |
-| 5 to below 10 | 🙂 Mild | Comfortable, but friends think you're nuts |
-| 10 to below 15 | ☀ Warm | Get a couple of loops in |
+| 3 to below 5 | ❄️ Cold | Bobble hat time |
+| 5 to below 8 | 🧤 Gloves | Gloves on, your hands will thank you |
+| 8 to below 10 | 🙂 Mild | Comfortable, but friends think you're nuts |
+| 10 to below 15 | ☀️ Warm | Get a couple of loops in |
 | 15 to below 20 | 🥵 Hot | Bit warm, stay hydrated |
-| 20 and above | 🔥 Fire | Soup. Warrior-grade soup. Bring ice cubes |
+| 20 to below 22 | 🔥 Fire | Soup. Warrior-grade soup. Bring ice cubes |
+| 22 and above | 🌋 Volcanic | The lake is lava. |
 
 ## Repository layout
 

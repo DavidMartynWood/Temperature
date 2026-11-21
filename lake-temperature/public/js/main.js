@@ -12,6 +12,7 @@ import {
 	UNITS,
 } from "./insights.js";
 import { getRange, getYesterdayRange } from "./range.js";
+import { setWaterBarReading } from "./water-bar.js";
 
 const LATEST_REFRESH_MS = 60 * 1000;
 const HISTORY_REFRESH_MS = 5 * 60 * 1000;
@@ -137,6 +138,7 @@ function showLatest(reading) {
 	renderTemperatureUnits();
 	renderRelativeTime();
 	renderTrend();
+	setWaterBarReading(reading);
 }
 
 function showMessage(message) {
@@ -294,6 +296,7 @@ for (const button of unitButtons) {
 		writeStorage("unit", state.unit);
 		renderTemperatureUnits();
 		redrawChart();
+		if (state.latest) setWaterBarReading(state.latest);
 	});
 }
 for (const button of rangeButtons) {
@@ -302,7 +305,24 @@ for (const button of rangeButtons) {
 retryButton.addEventListener("click", () => showHistory(state.rangeName));
 
 document.addEventListener("themechange", redrawChart);
+function loadInitialData() {
+	try {
+		const data = JSON.parse($("#initial-data")?.textContent ?? "null");
+		if (data?.reading) {
+			showLatest(data.reading);
+		}
+		if (data?.last24h) {
+			state.last24h = data.last24h;
+		}
+	} catch {
+		// Fall back to fetching below.
+	}
+}
+
+loadInitialData();
 renderTemperatureUnits();
+renderTrend();
+delete root.dataset.unitPending;
 refreshLatest();
 refreshLast24h();
 showHistory(state.rangeName);
