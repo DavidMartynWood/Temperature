@@ -41,16 +41,38 @@ function alreadyInstalled() {
 function show(selector, visible) {
 	const el = document.querySelector(selector);
 	if (el) {
-		el.hidden = !visible;
+		el.toggleAttribute("hidden", !visible);
 	}
+}
+
+// Curve from the top of the instruction to the menu button: bottom right on iOS, top right on Android.
+function drawArrow() {
+	const svg = document.querySelector("#install-arrow");
+	const step = document.querySelector(".inapp-step");
+	if (!inAppBrowser || !svg || !step) return;
+	const { innerWidth: w, innerHeight: h } = window;
+	const rect = step.getBoundingClientRect();
+	const sx = Math.min(rect.right, w - 60);
+	const ex = w - 30;
+	const ey = isIos ? h - 30 : 30;
+	const dir = isIos ? 1 : -1;
+	const sy = isIos ? rect.bottom + 6 : rect.top - 6;
+	svg.setAttribute("width", String(w));
+	svg.setAttribute("height", String(h));
+	svg
+		.querySelector("path[marker-end]")
+		.setAttribute(
+			"d",
+			`M${sx} ${sy} C${w - 10} ${sy + dir * 10} ${w - 6} ${ey - dir * 220} ${ex} ${ey}`,
+		);
 }
 
 function renderInstallPage() {
 	show("#install-inapp", inAppBrowser);
 	show("#install-inapp-ios", inAppBrowser && isIos);
 	show("#install-inapp-android", inAppBrowser && !isIos);
-	show("#install-arrow-ios", inAppBrowser && isIos);
-	show("#install-arrow-android", inAppBrowser && !isIos);
+	show("#install-arrow", inAppBrowser);
+	drawArrow();
 	show("#install-ready", !inAppBrowser && (deferred !== null || "install" in navigator));
 	show("#install-ios", !inAppBrowser && isIos);
 	show("#install-manual", !inAppBrowser && deferred === null && !isIos && !("install" in navigator));
@@ -170,3 +192,5 @@ window.addEventListener("appinstalled", () => {
 document.querySelector("#install-button")?.addEventListener("click", promptInstall);
 renderInstallPage();
 showPrompt();
+window.addEventListener("resize", drawArrow);
+window.addEventListener("scroll", drawArrow, { passive: true });

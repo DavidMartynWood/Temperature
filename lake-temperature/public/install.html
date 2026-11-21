@@ -23,12 +23,6 @@
 	</head>
 	<body>
 		<a class="skip-link" href="#content">Skip to content</a>
-		<a id="water-bar" class="water-bar" href="/temperature" data-state="loading">
-			<span class="water-bar-label">Welton Waters</span>
-			<span class="water-bar-temp" id="water-bar-temp">Water temperature</span>
-			<span class="water-bar-time" id="water-bar-time"></span>
-			<span class="water-bar-cta" aria-hidden="true">Graphs →</span>
-		</a>
 		<header class="page-header">
 				<a class="brand" href="/">
 					<img src="/images/ice-warriors-badge.svg" alt="" width="48" height="48" />
@@ -61,8 +55,6 @@
 						<p>Facebook, Messenger and Instagram can't install apps, so open this page in your phone's browser first.</p>
 						<p id="install-inapp-ios" hidden>Then in Safari, tap <strong>Share</strong> and <strong>Add to Home Screen</strong>.</p>
 						<p id="install-inapp-android" hidden>Choose <strong>Open in Chrome</strong> (or <strong>Open in browser</strong>), then use the browser menu to install.</p>
-						<span id="install-arrow-ios" class="menu-arrow menu-arrow-bottom" aria-hidden="true" hidden>↘</span>
-						<span id="install-arrow-android" class="menu-arrow menu-arrow-top" aria-hidden="true" hidden>↗</span>
 					</div>
 					<div id="install-ready" hidden>
 						<p>Install the app on this device.</p>
@@ -75,6 +67,14 @@
 				</section>
 			</article>
 		</main>
+		<svg id="install-arrow" class="menu-arrow" aria-hidden="true" hidden>
+			<defs>
+				<marker id="install-arrowhead" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
+					<path d="M0 0L4 2L0 4z" fill="#ff7a00" />
+				</marker>
+			</defs>
+			<path fill="none" stroke="#ff7a00" stroke-width="6" stroke-linecap="round" marker-end="url(#install-arrowhead)" />
+		</svg>
 
 		<footer id="social-links">
 				<p>
@@ -104,6 +104,5 @@
 		<script type="module" src="/js/theme.js"></script>
 		<script type="module" src="/js/nav.js"></script>
 		<script type="module" src="/js/install.js"></script>
-		<script type="module" src="/js/water-bar.js"></script>
 	</body>
 </html>
