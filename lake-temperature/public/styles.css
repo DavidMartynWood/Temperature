@@ -1135,6 +1135,49 @@ button.button {
 	margin-top: 0.35rem;
 }
 
+.inapp-step {
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.menu-arrow {
+	position: fixed;
+	z-index: 20;
+	right: 1rem;
+	font-size: 4rem;
+	line-height: 1;
+	font-weight: 700;
+	color: var(--accent);
+	pointer-events: none;
+	animation: menu-arrow-bounce 1s ease-in-out infinite;
+}
+
+.menu-arrow[hidden] {
+	display: none;
+}
+
+.menu-arrow-top {
+	top: 0.5rem;
+	--nudge: -0.5rem;
+}
+
+.menu-arrow-bottom {
+	bottom: 0.5rem;
+	--nudge: 0.5rem;
+}
+
+@keyframes menu-arrow-bounce {
+	50% {
+		transform: translate(0.4rem, var(--nudge));
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.menu-arrow {
+		animation: none;
+	}
+}
+
 body.install-prompt-open {
 	padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }

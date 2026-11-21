@@ -49,6 +49,8 @@ function renderInstallPage() {
 	show("#install-inapp", inAppBrowser);
 	show("#install-inapp-ios", inAppBrowser && isIos);
 	show("#install-inapp-android", inAppBrowser && !isIos);
+	show("#install-arrow-ios", inAppBrowser && isIos);
+	show("#install-arrow-android", inAppBrowser && !isIos);
 	show("#install-ready", !inAppBrowser && (deferred !== null || "install" in navigator));
 	show("#install-ios", !inAppBrowser && isIos);
 	show("#install-manual", !inAppBrowser && deferred === null && !isIos && !("install" in navigator));
