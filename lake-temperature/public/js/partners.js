@@ -1,4 +1,3 @@
-const STORAGE_KEY = "partners-uncovered";
 const MASK = "••••••••";
 
 /**
@@ -16,28 +15,6 @@ export function sortPartners(partners) {
 /** @param {Partner[]} partners */
 export function hasMembersPartners(partners) {
 	return partners.some((partner) => partner.visibility === "members");
-}
-
-/** @returns {Record<string, HiddenFields>} */
-function readStoredSecrets() {
-	try {
-		const raw = sessionStorage.getItem(STORAGE_KEY);
-		if (!raw) return {};
-		const parsed = JSON.parse(raw);
-		if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-		return parsed;
-	} catch {
-		return {};
-	}
-}
-
-/** @param {Record<string, HiddenFields>} secrets */
-function writeStoredSecrets(secrets) {
-	try {
-		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(secrets));
-	} catch {
-		/* ignore quota / private mode */
-	}
 }
 
 /**
@@ -301,7 +278,7 @@ async function main() {
 		return;
 	}
 
-	let secrets = readStoredSecrets();
+	let secrets = {};
 	/** @type {Map<string, (fields: HiddenFields) => void>} */
 	const applyById = new Map();
 
@@ -365,7 +342,6 @@ async function main() {
 			}
 
 			secrets = { ...secrets, ...(payload.partners || {}) };
-			writeStoredSecrets(secrets);
 
 			for (const partner of partners) {
 				if (partner.visibility !== "members") continue;
