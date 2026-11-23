@@ -18,6 +18,7 @@ function write(key, value) {
 }
 
 const onInstallPage = window.location.pathname.replace(/\.html$|\/$/g, "") === "/install";
+const inAppFallback = new URLSearchParams(window.location.search).get("open-in-browser") === "1";
 const isIos =
 	/iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
 	(window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
@@ -49,6 +50,8 @@ function renderInstallPage() {
 	show("#install-inapp", inAppBrowser);
 	show("#install-inapp-ios", inAppBrowser && isIos);
 	show("#install-inapp-android", inAppBrowser && !isIos);
+	show("#install-inapp-android-open", inAppBrowser && !isIos && !inAppFallback);
+	show("#install-inapp-android-fallback", inAppBrowser && !isIos && inAppFallback);
 	show("#install-ready", !inAppBrowser && (deferred !== null || "install" in navigator));
 	show("#install-ios", !inAppBrowser && isIos);
 	show("#install-manual", !inAppBrowser && deferred === null && !isIos && !("install" in navigator));
@@ -166,5 +169,35 @@ window.addEventListener("appinstalled", () => {
 });
 
 document.querySelector("#install-button")?.addEventListener("click", promptInstall);
+
+const installUrl = `${window.location.origin}/install`;
+const fallbackUrl = new URL(installUrl);
+fallbackUrl.searchParams.set("open-in-browser", "1");
+const chromeLink = document.querySelector("#open-chrome");
+if (chromeLink instanceof HTMLAnchorElement) {
+	chromeLink.href = `intent://${window.location.host}/install#Intent;scheme=${window.location.protocol.slice(0, -1)};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(fallbackUrl.toString())};end`;
+}
+
+const installLink = document.querySelector("#install-link");
+if (installLink instanceof HTMLAnchorElement) {
+	installLink.href = installUrl;
+	installLink.textContent = installUrl;
+}
+
+async function copyLink(statusSelector, browserName) {
+	const status = document.querySelector(statusSelector);
+	try {
+		await navigator.clipboard.writeText(installUrl);
+		if (status) status.textContent = `Link copied. Now paste it into ${browserName}.`;
+	} catch {
+		// Clipboard access can be blocked in in-app browsers, so show the link to copy by hand.
+		if (status) status.textContent = `Copy this link into ${browserName}: ${installUrl}`;
+	}
+}
+
+document.querySelector("#copy-link")?.addEventListener("click", () => copyLink("#copy-link-status", "Safari"));
+document.querySelector("#copy-link-android")?.addEventListener("click", () =>
+	copyLink("#copy-link-android-status", "your browser"),
+);
 renderInstallPage();
 showPrompt();
