@@ -49,6 +49,7 @@ function renderInstallPage() {
 	show("#install-inapp", inAppBrowser);
 	show("#install-inapp-ios", inAppBrowser && isIos);
 	show("#install-inapp-android", inAppBrowser && !isIos);
+	show("#install-inapp-android-hint", inAppBrowser && !isIos);
 	show("#install-ready", !inAppBrowser && (deferred !== null || "install" in navigator));
 	show("#install-ios", !inAppBrowser && isIos);
 	show("#install-manual", !inAppBrowser && deferred === null && !isIos && !("install" in navigator));
@@ -166,5 +167,24 @@ window.addEventListener("appinstalled", () => {
 });
 
 document.querySelector("#install-button")?.addEventListener("click", promptInstall);
+
+const installUrl = `${window.location.origin}/install`;
+const chromeLink = document.querySelector("#open-chrome");
+if (chromeLink instanceof HTMLAnchorElement) {
+	chromeLink.href = `intent://${window.location.host}/install#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(installUrl)};end`;
+}
+
+async function copyLink() {
+	const status = document.querySelector("#copy-link-status");
+	try {
+		await navigator.clipboard.writeText(installUrl);
+		if (status) status.textContent = "Link copied. Paste it into your browser.";
+	} catch {
+		// Clipboard access can be blocked in in-app browsers, so show the link to copy by hand.
+		if (status) status.textContent = `Copy this link into your browser: ${installUrl}`;
+	}
+}
+
+document.querySelector("#copy-link")?.addEventListener("click", copyLink);
 renderInstallPage();
 showPrompt();
