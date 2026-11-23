@@ -57,12 +57,15 @@
 				<section class="card copy" aria-labelledby="install-title">
 					<h2 id="install-title">Install</h2>
 					<div id="install-inapp" hidden>
-						<p>You're viewing this page inside Facebook, Messenger or Instagram, which can't install apps. Open it in your phone's browser first.</p>
-						<p><button type="button" id="copy-link" class="button">Copy link</button></p>
-						<p id="copy-link-status" role="status"></p>
-						<p id="install-inapp-ios" hidden>Open Safari, paste the link into the address bar, then tap <strong>Share</strong> and <strong>Add to Home Screen</strong>. You can also try the <strong>⋯</strong> menu and <strong>Open in Safari</strong>.</p>
-						<p id="install-inapp-android" hidden><a id="open-chrome" class="button" href="/install">Open in Chrome</a></p>
-						<p id="install-inapp-android-hint" hidden>Or paste the link into your browser, or use the <strong>⋮</strong> menu and <strong>Open in browser</strong>.</p>
+						<div id="install-inapp-ios" hidden>
+							<p>Copy the link, then paste it into Safari to install.</p>
+							<p><button type="button" id="copy-link" class="button">Copy link</button></p>
+							<p id="copy-link-status" role="status"></p>
+						</div>
+						<div id="install-inapp-android" hidden>
+							<p>Open this page in Chrome to install.</p>
+							<p><a id="open-chrome" class="button" href="/install">Open in Chrome</a></p>
+						</div>
 					</div>
 					<div id="install-ready" hidden>
 						<p>Install the app on this device.</p>

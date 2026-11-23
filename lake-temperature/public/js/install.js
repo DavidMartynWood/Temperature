@@ -49,7 +49,6 @@ function renderInstallPage() {
 	show("#install-inapp", inAppBrowser);
 	show("#install-inapp-ios", inAppBrowser && isIos);
 	show("#install-inapp-android", inAppBrowser && !isIos);
-	show("#install-inapp-android-hint", inAppBrowser && !isIos);
 	show("#install-ready", !inAppBrowser && (deferred !== null || "install" in navigator));
 	show("#install-ios", !inAppBrowser && isIos);
 	show("#install-manual", !inAppBrowser && deferred === null && !isIos && !("install" in navigator));
@@ -178,10 +177,10 @@ async function copyLink() {
 	const status = document.querySelector("#copy-link-status");
 	try {
 		await navigator.clipboard.writeText(installUrl);
-		if (status) status.textContent = "Link copied. Paste it into your browser.";
+		if (status) status.textContent = "Link copied. Now paste it into Safari.";
 	} catch {
 		// Clipboard access can be blocked in in-app browsers, so show the link to copy by hand.
-		if (status) status.textContent = `Copy this link into your browser: ${installUrl}`;
+		if (status) status.textContent = `Copy this link into Safari: ${installUrl}`;
 	}
 }
 
