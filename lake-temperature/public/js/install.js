@@ -170,7 +170,7 @@ document.querySelector("#install-button")?.addEventListener("click", promptInsta
 const installUrl = `${window.location.origin}/install`;
 const chromeLink = document.querySelector("#open-chrome");
 if (chromeLink instanceof HTMLAnchorElement) {
-	chromeLink.href = `intent://${window.location.host}/install#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(installUrl)};end`;
+	chromeLink.href = `intent://${window.location.host}/install#Intent;scheme=${window.location.protocol.slice(0, -1)};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(installUrl)};end`;
 }
 
 async function copyLink() {
