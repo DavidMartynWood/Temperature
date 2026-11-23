@@ -64,8 +64,16 @@
 							<p id="copy-link-status" role="status"></p>
 						</div>
 						<div id="install-inapp-android" hidden>
-							<p>Open this page in Chrome to install.</p>
-							<p><a id="open-chrome" class="button" href="/install">Open in Chrome</a></p>
+							<div id="install-inapp-android-open">
+								<p>Open this page in Chrome to install.</p>
+								<p><a id="open-chrome" class="button" href="/install">Open in Chrome</a></p>
+							</div>
+							<div id="install-inapp-android-fallback" hidden>
+								<p>Chrome couldn't be opened. Copy the link below, then paste it into your browser's address bar.</p>
+								<p><a id="install-link" href="/install"></a></p>
+								<p><button type="button" id="copy-link-android" class="button">Copy link</button></p>
+								<p id="copy-link-android-status" role="status"></p>
+							</div>
 						</div>
 					</div>
 					<div id="install-ready" hidden>
