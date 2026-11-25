@@ -339,9 +339,17 @@ setInterval(() => {
 		showHistory(state.rangeName, { quiet: true });
 	}
 }, HISTORY_REFRESH_MS);
-document.addEventListener("visibilitychange", () => {
-	if (!document.hidden) {
-		refreshLatest();
-		renderRelativeTime();
-	}
-});
+let lastResumeRefresh = Date.now();
+function refreshOnResume() {
+	if (document.hidden) return;
+	renderRelativeTime();
+	// Resume events often fire together, and the initial load has just fetched.
+	if (Date.now() - lastResumeRefresh < 5000) return;
+	lastResumeRefresh = Date.now();
+	refreshLatest();
+}
+// Installed PWAs may resume without a visibilitychange, or before the network is back.
+document.addEventListener("visibilitychange", refreshOnResume);
+window.addEventListener("pageshow", refreshOnResume);
+window.addEventListener("focus", refreshOnResume);
+window.addEventListener("online", refreshOnResume);
